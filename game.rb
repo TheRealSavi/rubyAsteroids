@@ -1,6 +1,6 @@
 require 'ruby2d'
-set width: 1680, height:1050
-set title: "Asteroids", fullscreen:true
+set width: 480, height:480
+set title: "Asteroids", fullscreen:false
 
 class Ship
   attr_accessor :health, :pos, :meShape, :color, :vel, :bullets
@@ -13,7 +13,7 @@ class Ship
     @bullets = []
     @meShape = Square.new(
       x: 0, y: 0,
-      size: 10,
+      size: 20,
       color: color,
       z: 100
     )
@@ -44,7 +44,7 @@ class Bullet
     @vel = vel
     @model = Square.new(
       x: @pos.x, y: @pos.y,
-      size: 2,
+      size: 8,
       color: 'red',
       z: 100
     )
