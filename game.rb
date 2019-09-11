@@ -3,7 +3,7 @@ set width: 480, height:480
 set title: "Asteroids", fullscreen:false
 
 class Ship
-  attr_accessor :health, :pos, :meShape, :color, :vel, :bullets
+  attr_accessor :health, :pos, :model, :color, :vel, :bullets
 
   def initialize(health, pos, color)
     @health = health
@@ -11,7 +11,7 @@ class Ship
     @color = color
     @vel = Pos.new(0,0)
     @bullets = []
-    @meShape = Square.new(
+    @model = Square.new(
       x: 0, y: 0,
       size: 20,
       color: color,
@@ -30,23 +30,23 @@ class Ship
 
   def update()
     self.move()
-    @meShape.x = @pos.x
-    @meShape.y = @pos.y
+    @model.x = @pos.x
+    @model.y = @pos.y
   end
-
 end
 
 class Bullet
-  attr_accessor :pos, :model, :vel
+  attr_accessor :pos, :model, :vel, :color
 
-  def initialize(pos,vel)
-    @pos = pos
+  def initialize(pos, vel)
+    @pos = Pos.new(pos.x + 5, pos.y + 5)
     @vel = Pos.new(vel.x * 3, vel.y * 3)
+    @color = 'red'
     @model = Square.new(
       x: @pos.x, y: @pos.y,
       size: 8,
-      color: 'red',
-      z: 100
+      color: color,
+      z: 99
     )
   end
 
@@ -57,8 +57,9 @@ class Bullet
     #end
   end
 
-  def kill()
-    #Remove self from bullets array
+  def kill(bullets)
+    bullets.delete(self)
+    @model.remove
   end
 
   def move()
@@ -71,7 +72,6 @@ class Bullet
     @model.x = @pos.x
     @model.y = @pos.y
   end
-
 end
 
 class Asteroid
@@ -80,21 +80,30 @@ class Asteroid
   def initialize(size, pos)
     @size = size
     @pos = pos
+    @model = Square.new(
+      x: @pos.x, y: @pos.y,
+      size: @size,
+      color: 'brown',
+      z: 101
+    )
   end
 
   def split()
     if @size <= 1
-      #self.kill
+
     else
     @size = @size/2
     #make new Asteroid(@size, @pos)
     end
   end
 
-  def kill()
-    #Remove self from asteroids array
+  def kill(asteroids)
+    asteroids.delete(self)
+    @model.remove
   end
 
+  def update()
+  end
 end
 
 class Pos
@@ -107,41 +116,40 @@ class Pos
 
 end
 
-Vels = [
-  Pos.new(0,-1),
-  Pos.new(0,1),
-  Pos.new(-1,0),
-  Pos.new(1,0),
-  Pos.new(0,0)
-]
+asteroids = []
+ships = []
+ships.push(Ship.new(3, Pos.new(0,0),'random'))
+asteroids.push(Asteroid.new(60, Pos.new(120,120)))
 
-me = Ship.new(3, Pos.new(0,0),'green')
 
 on :key_down do |event|
-  case event.key
-  when "w"
-    me.vel = Vels[0]
-  when "a"
-    me.vel = Vels[2]
-  when "s"
-    me.vel = Vels[1]
-  when "d"
-    me.vel = Vels[3]
-  when "x"
-    me.vel = Vels[4]
-  when "e"
-    me.shoot()
+  for i in ships
+    case event.key
+      when "w"
+        i.vel = Pos.new(0,-1)
+      when "a"
+        i.vel = Pos.new(-1,0)
+      when "s"
+        i.vel = Pos.new(0,1)
+      when "d"
+        i.vel = Pos.new(1,0)
+      when "e"
+        i.shoot()
+      when "x"
+        for j in i.bullets
+          j.kill(i.bullets)
+        end
+    end
   end
 end
 
 update do
-
- me.update()
-
-  for i in me.bullets
+  for i in ships
     i.update()
+    for j in i.bullets
+      j.update()
+    end
   end
-
 end
 
 show
