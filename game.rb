@@ -25,7 +25,7 @@ class Ship
   end
 
   def shoot()
-    @bullets.push(Bullet.new(@pos, @vel))
+    @bullets.push(Bullet.new(Pos.new(@pos.x,@pos.y),Pos.new(@vel.x,@vel.y)))
   end
 
   def update()
@@ -41,7 +41,7 @@ class Bullet
 
   def initialize(pos,vel)
     @pos = pos
-    @vel = vel
+    @vel = Pos.new(vel.x * 3, vel.y * 3)
     @model = Square.new(
       x: @pos.x, y: @pos.y,
       size: 8,
@@ -134,8 +134,6 @@ on :key_down do |event|
   end
 end
 
-
-tick = 0
 update do
 
  me.update()
@@ -144,7 +142,6 @@ update do
     i.update()
   end
 
-  tick += 1
 end
 
 show
