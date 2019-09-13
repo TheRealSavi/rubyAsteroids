@@ -52,9 +52,16 @@ class Bullet
 
   def hit()
     for i in $asteroids do
-      if @model.x >= i.pos.x && @model.x <= i.pos.x + i.size && @model.y >= i.pos.y && @model.y <= i.pos.y + i.size || @model.x + @model.size >= i.pos.x && @model.x + @model.size <= i.pos.x + i.size && @model.y + @model.size >= i.pos.y && @model.y + @model.size <= i.pos.y + i.size
+      if (
+          @model.x >= i.pos.x &&
+          @model.x <= i.pos.x + i.size &&
+          @model.y >= i.pos.y &&
+          @model.y <= i.pos.y + i.size ||
+          @model.x + @model.size >= i.pos.x &&
+          @model.x + @model.size <= i.pos.x + i.size &&
+          @model.y + @model.size >= i.pos.y &&
+          @model.y + @model.size <= i.pos.y + i.size)
         i.split()
-        puts "hit"
         return true
       else
         return false
@@ -94,12 +101,12 @@ class Asteroid
   end
 
   def split()
-    if @size <= 16
+    if @size <= 32
       self.kill()
     else
-    @size = @size/2
-    @model.size = @size
-    $asteroids.push(Asteroid.new(@size, Pos.new(rand(1..Window.width),rand(1..Window.height))))
+      @size = @size/2
+      @model.size = @size
+      $asteroids.push(Asteroid.new(@size, Pos.new(rand(1..Window.width),rand(1..Window.height))))
     end
   end
 
@@ -109,6 +116,7 @@ class Asteroid
   end
 
   def update()
+
   end
 end
 
@@ -125,26 +133,24 @@ end
 $asteroids = []
 ships = []
 ships.push(Ship.new(3, Pos.new(Window.width/2-20,Window.height-40),'lime'))
-$asteroids.push(Asteroid.new(60, Pos.new(rand(1..Window.width),rand(1..Window.height))))
+$asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width),rand(1..Window.height))))
 
 
 on :key_down do |event|
   for i in ships
     case event.key
       when "w"
-        i.vel = Pos.new(0,-1)
+        i.vel = Pos.new(0,-3)
       when "a"
-        i.vel = Pos.new(-1,0)
+        i.vel = Pos.new(-3,0)
       when "s"
-        i.vel = Pos.new(0,1)
+        i.vel = Pos.new(0,3)
       when "d"
-        i.vel = Pos.new(1,0)
+        i.vel = Pos.new(3,0)
       when "e"
         i.shoot()
       when "x"
-        for j in i.bullets
-          j.kill(i.bullets)
-        end
+        $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width),rand(1..Window.height))))
     end
   end
 end
@@ -153,10 +159,10 @@ update do
   for i in ships
     i.update()
     for j in i.bullets
-      j.update()
       if j.hit()
         j.kill(i.bullets)
       end
+      j.update()
     end
   end
 end
