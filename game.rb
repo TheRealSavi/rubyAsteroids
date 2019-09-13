@@ -3,12 +3,13 @@ set width: 480, height:480
 set title: "Asteroids", fullscreen:false
 
 class Ship
-  attr_accessor :health, :pos, :model, :color, :vel, :bullets
+  attr_accessor :health, :pos, :model, :color, :vel, :bullets, :speed
 
   def initialize(health, pos, color)
     @health = health
     @pos = pos
     @color = color
+    @speed = 2
     @vel = Pos.new(0,0)
     @bullets = []
     @model = Square.new(
@@ -140,13 +141,13 @@ on :key_down do |event|
   for i in ships
     case event.key
       when "w"
-        i.vel = Pos.new(0,-3)
+        i.vel = Pos.new(0,-i.speed)
       when "a"
-        i.vel = Pos.new(-3,0)
+        i.vel = Pos.new(-i.speed,0)
       when "s"
-        i.vel = Pos.new(0,3)
+        i.vel = Pos.new(0,i.speed)
       when "d"
-        i.vel = Pos.new(3,0)
+        i.vel = Pos.new(i.speed,0)
       when "e"
         i.shoot()
       when "x"
