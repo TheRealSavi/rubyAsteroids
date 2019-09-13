@@ -12,7 +12,7 @@ class Ship
     @vel = Pos.new(0,0)
     @bullets = []
     @model = Square.new(
-      x: 0, y: 0,
+      x: pos.x, y: pos.y,
       size: 20,
       color: color,
       z: 100
@@ -51,10 +51,15 @@ class Bullet
   end
 
   def hit()
-    #if self.pos contains Asteroid.pos
-      #Asteroid.split()
-      #self.kill
-    #end
+    for i in $asteroids do
+      if @model.x >= i.pos.x && @model.x <= i.pos.x + i.size && @model.y >= i.pos.y && @model.y <= i.pos.y + i.size || @model.x + @model.size >= i.pos.x && @model.x + @model.size <= i.pos.x + i.size && @model.y + @model.size >= i.pos.y && @model.y + @model.size <= i.pos.y + i.size
+        i.split()
+        puts "hit"
+        return true
+      else
+        return false
+      end
+    end
   end
 
   def kill(bullets)
@@ -89,16 +94,17 @@ class Asteroid
   end
 
   def split()
-    if @size <= 1
-
+    if @size <= 16
+      self.kill()
     else
     @size = @size/2
-    #make new Asteroid(@size, @pos)
+    @model.size = @size
+    $asteroids.push(Asteroid.new(@size, Pos.new(rand(1..Window.width),rand(1..Window.height))))
     end
   end
 
-  def kill(asteroids)
-    asteroids.delete(self)
+  def kill()
+    $asteroids.delete(self)
     @model.remove
   end
 
@@ -116,10 +122,10 @@ class Pos
 
 end
 
-asteroids = []
+$asteroids = []
 ships = []
-ships.push(Ship.new(3, Pos.new(0,0),'random'))
-asteroids.push(Asteroid.new(60, Pos.new(120,120)))
+ships.push(Ship.new(3, Pos.new(Window.width/2-20,Window.height-40),'lime'))
+$asteroids.push(Asteroid.new(60, Pos.new(rand(1..Window.width),rand(1..Window.height))))
 
 
 on :key_down do |event|
@@ -148,6 +154,9 @@ update do
     i.update()
     for j in i.bullets
       j.update()
+      if j.hit()
+        j.kill(i.bullets)
+      end
     end
   end
 end
