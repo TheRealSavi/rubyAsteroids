@@ -178,7 +178,7 @@ class Asteroid
   def initialize(size, pos)
     @size = size
     @pos = pos
-
+    @vel = Pos.new(rand(-0.35..0.35),rand(-0.35..0.35))
     #asteroids model
     @model = Image.new(
       'asteroid.png',
@@ -218,8 +218,26 @@ class Asteroid
     @id.remove
   end
 
+  def move()
+    if (
+    @model.x >= Window.width-@size ||
+    @model.x <= 0 ||
+    @model.y >= Window.height-@size ||
+    @model.y <= 0
+    )
+      #if the ship isnt in a valid position to complete its user decide move it will just reverse the direction and bounce
+      @vel.x = -@vel.x
+      @vel.y = -@vel.y
+    end
+    @pos.x += @vel.x
+    @pos.y += @vel.y
+    @model.x = @pos.x
+    @model.y = @pos.y
+  end
+
   #this gets called every fram by the windows update method
   def update()
+    self.move()
     #this gets rid of the text on the asteroid that shows its postion in the array
     @id.remove
     #this updates the text to whatever positon it might be in now
