@@ -105,10 +105,11 @@ class Bullet
     @size = 8
     @bullets = bullets
     #here is the bullets model object
-    @model = Square.new(
+    @model = Image.new(
+      'bullet.png',
       x: @pos.x, y: @pos.y,
-      size: @size,
-      color: color,
+      width: @size, height: @size,
+      rotate: 0,
       z: 99
     )
   end
@@ -122,10 +123,10 @@ class Bullet
       @model.x <= k.pos.x + k.size &&
       @model.y >= k.pos.y &&
       @model.y <= k.pos.y + k.size ||
-      @model.x + @model.size >= k.pos.x &&
-      @model.x + @model.size <= k.pos.x + k.size &&
-      @model.y + @model.size >= k.pos.y &&
-      @model.y + @model.size <= k.pos.y + k.size
+      @model.x + @size >= k.pos.x &&
+      @model.x + @size <= k.pos.x + k.size &&
+      @model.y + @size >= k.pos.y &&
+      @model.y + @size <= k.pos.y + k.size
       )
         #if it detects it is in an asteroid it calls that asteroids split function and then kills itself
         k.split()
