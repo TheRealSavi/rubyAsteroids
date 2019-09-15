@@ -211,8 +211,7 @@ ships = []
 #this addes a new ship to the ships array so the game can be played lol
 ships.push(Ship.new(3, Pos.new(Window.width/2-20,Window.height-40),'lime'))
 #this adds the first asteroid to the asteroids array so something can be shot
-$asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width),rand(1..Window.height))))
-
+$asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
 #this is a ruby2d event that is called every time a key is pushed down. it gets passed the key that was pushed in the event var
 on :key_down do |event|
   #this goes through all the ships so they are all controlled at once
@@ -234,7 +233,7 @@ on :key_down do |event|
         i.shoot()
       when "x"
         #this creates a new asteroid and adds it to the asteroids array
-        $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width),rand(1..Window.height))))
+        $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
     end
   end
 end
