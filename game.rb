@@ -204,8 +204,8 @@ class Asteroid
       #if it is good to go then the size will be halved, kill itself, ans create two new asteroids
       @size = @size/2
       self.kill()
-      $asteroids.push(Asteroid.new(@size, Pos.new(rand(@pos.x-64..@pos.x+64),rand(@pos.y-64..@pos.y+64))))
-      $asteroids.push(Asteroid.new(@size, Pos.new(rand(@pos.x-64..@pos.x+64),rand(@pos.y-64..@pos.y+64))))
+      $asteroids.push(Asteroid.new(@size, Pos.new(rand(@pos.x-64..@pos.x+64).clamp(0,Window.width),rand(@pos.y-64..@pos.y+64).clamp(0,Window.height))))
+      $asteroids.push(Asteroid.new(@size, Pos.new(rand(@pos.x-64..@pos.x+64).clamp(0,Window.width),rand(@pos.y-64..@pos.y+64).clamp(0,Window.height))))
     end
   end
 
