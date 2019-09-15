@@ -1,6 +1,6 @@
 require 'ruby2d'
-#set width: 1920, height:1080
-set title: "Asteroids", fullscreen:true, background: 'black'
+set width: 1280, height:720
+set title: "Asteroids", fullscreen:true, background: 'navy'
 
 
 class Ship
@@ -15,7 +15,7 @@ class Ship
     #this holds the last direction the ship was moving so it knows what angle to lerp from
     @lastDir = ""
     #this holds the ships new direction so it knows where to lerp to
-    @dir = "d"
+    @dir = "w"
     #this holds how many frams the ship has lerped for so it knows when to stop rotating
     @lerps = 0
     #this is how many pixels the ship moves per frame
@@ -29,7 +29,7 @@ class Ship
       'ship.png',
       x: @pos.x, y: @pos.y,
       width: @size, height: @size,
-      rotate: 0,
+      rotate: -90,
       z: 200
     )
   end
@@ -325,7 +325,9 @@ ships = []
 #this addes a new ship to the ships array so the game can be played lol
 ships.push(Ship.new(3, Pos.new(Window.width/2-20,Window.height-40),'lime'))
 #this adds the first asteroid to the asteroids array so something can be shot
-$asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
+4.times do
+  $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
+end
 #this is a ruby2d event that is called every time a key is pushed down. it gets passed the key that was pushed in the event var
 on :key_down do |event|
   #this goes through all the ships so they are all controlled at once
