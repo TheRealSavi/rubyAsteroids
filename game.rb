@@ -178,13 +178,16 @@ class Asteroid
   def initialize(size, pos)
     @size = size
     @pos = pos
+
     #asteroids model
-    @model = Square.new(
+    @model = Image.new(
+      'asteroid.png',
       x: @pos.x, y: @pos.y,
-      size: @size,
-      color: 'brown',
+      width: @size, height: @size,
+      rotate: 0,
       z: 101
     )
+
     #this is a number that appears on every asteroid that shows its position in the asteroids array
     @id = Text.new($asteroids.index(self).to_s, x: @pos.x, y: @pos.y, z:102)
     #shows the number
@@ -200,8 +203,8 @@ class Asteroid
       #if it is good to go then the size will be halved, kill itself, ans create two new asteroids
       @size = @size/2
       self.kill()
-      $asteroids.push(Asteroid.new(@size, Pos.new(rand(1..Window.width-@size),rand(1..Window.height-@size))))
-      $asteroids.push(Asteroid.new(@size, Pos.new(rand(1..Window.width-@size),rand(1..Window.height-@size))))
+      $asteroids.push(Asteroid.new(@size, Pos.new(rand(@pos.x-64..@pos.x+64),rand(@pos.y-64..@pos.y+64))))
+      $asteroids.push(Asteroid.new(@size, Pos.new(rand(@pos.x-64..@pos.x+64),rand(@pos.y-64..@pos.y+64))))
     end
   end
 
