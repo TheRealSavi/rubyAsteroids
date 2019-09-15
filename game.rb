@@ -82,10 +82,11 @@ class Ship
         #if it is it resets everything for next time and says that the last direction is now its current direction
         @lerps = 0
         @lerp = 0
-        #@lastDir = @dir
+        @lastDir = @dir
       end
     end
 
+    #this updates the models postion to the position made by the move function
     @model.x = @pos.x
     @model.y = @pos.y
   end
@@ -237,6 +238,8 @@ class Pos
   end
 end
 
+#this is the fucking LerpTable
+#it knows how to do shit
 class LerpTable
   def initialize(lastVal, newVal)
     @l = lastVal
