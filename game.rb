@@ -1,28 +1,43 @@
 require 'ruby2d'
-set width: 480, height:480
-set title: "Asteroids", fullscreen:false
+#set width: 1920, height:1080
+set title: "Asteroids", fullscreen:true, background: 'black'
 
 
 class Ship
   #This allows read and write access to these variables when called outside of the class
-  attr_accessor :health, :pos, :model, :color, :vel, :bullets, :speed, :size
+  attr_accessor :health, :pos, :model, :rot, :vel, :bullets, :speed, :size, :lerp, :lerps, :lastDir
 
   def initialize(health, pos, color)
     @health = health
     @pos = pos
-    @color = color
+    #this tells the ship how many degrees to rotate when lerping
+    @lerp = 0
+    #this holds the last direction the ship was moving so it knows what angle to lerp from
+    @lastDir = ""
+    #this holds the ships new direction so it knows where to lerp to
+    @dir = "d"
+    #this holds how many frams the ship has lerped for so it knows when to stop rotating
+    @lerps = 0
+    #this is how many pixels the ship moves per frame
     @speed = 2
     @size = 20
     @vel = Pos.new(0,0)
     #This is the ships array of bullets that hold holds all the bullet objects this ship creates
     @bullets = []
     #This is the ships model object so that there is something to actually display
-    @model = Square.new(
-      x: pos.x, y: pos.y,
-      size: @size,
-      color: color,
-      z: 100
+    @model = Image.new(
+      'ship.png',
+      x: @pos.x, y: @pos.y,
+      width: @size, height: @size,
+      rotate: 0,
+      z: 200
     )
+  end
+
+  #this is called when the user presses a direction key, it is used to keep track of the current and old directions for lerping
+  def changeDir(newDir)
+    @lastDir = @dir
+    @dir = newDir
   end
 
   #This gets called every frame by the ships update method
@@ -53,6 +68,24 @@ class Ship
   #it calls the ships move method and then updates the models position to match the new decided position
   def update()
     self.move()
+
+    #this asks the lerp table to know how many degrees to rotate per fram for 10 frames until it has rotated to the new direction
+    @lerp = LerpTable.new(@lastDir,@dir).calculate()
+    #this checks if it needs to lerp
+    if @lerp != 0 && @lerp != nil
+      #iterates the frames lerped by one so it knows when to stop
+      @lerps += 1
+      #this rotates the model by the degree specified by the LerpTable
+      @model.rotate += @lerp
+      #checks if its done lerping yet
+      if @lerps >= 10
+        #if it is it resets everything for next time and says that the last direction is now its current direction
+        @lerps = 0
+        @lerp = 0
+        #@lastDir = @dir
+      end
+    end
+
     @model.x = @pos.x
     @model.y = @pos.y
   end
@@ -204,6 +237,62 @@ class Pos
   end
 end
 
+class LerpTable
+  def initialize(lastVal, newVal)
+    @l = lastVal
+    @n = newVal
+  end
+
+  def calculate()
+    case @l
+    when "w"
+      case @n
+      when "w"
+        return 0
+      when "a"
+        return -9
+      when "s"
+        return 18
+      when "d"
+        return 9
+      end
+    when "a"
+      case @n
+      when "a"
+        return 0
+      when "w"
+        return 9
+      when "s"
+        return -9
+      when "d"
+        return 18
+      end
+    when "s"
+      case @n
+      when "s"
+        return 0
+      when "w"
+        return 18
+      when "a"
+        return 9
+      when "d"
+        return -9
+      end
+    when "d"
+      case @n
+      when "d"
+        return 0
+      when "w"
+        return -9
+      when "a"
+        return 18
+      when "s"
+        return 9
+      end
+    end
+  end
+end
+
 #this initializes the asteroids array
 $asteroids = []
 #this initializes the ships array
@@ -216,24 +305,32 @@ $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-12
 on :key_down do |event|
   #this goes through all the ships so they are all controlled at once
   for i in ships
-    case event.key
-      when "w"
-        #this is change the current ships velocity to a new vector that has a value of 0 in the x
-        #                                      and a negative version of the ships speed in the y
-        #it is the same idea for all the other velocity changes
-        i.vel = Pos.new(0,-i.speed)
-      when "a"
-        i.vel = Pos.new(-i.speed,0)
-      when "s"
-        i.vel = Pos.new(0,i.speed)
-      when "d"
-        i.vel = Pos.new(i.speed,0)
-      when "e"
-        #this calls that ships shoot function which creates a bullet object and adds it to that ships bullets array
-        i.shoot()
-      when "x"
-        #this creates a new asteroid and adds it to the asteroids array
-        $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
+    #if the current ship isnt animating then check for keys
+    if i.lerps == 0
+      case event.key
+        when "w"
+          #this is change the current ships velocity to a new vector that has a value of 0 in the x
+          #                                      and a negative version of the ships speed in the y
+          #then it changes the ships direction identifier to the new direction
+          #it is the same idea for all the other velocity changes
+          i.vel = Pos.new(0,-i.speed)
+          i.changeDir("w")
+        when "a"
+          i.vel = Pos.new(-i.speed,0)
+          i.changeDir("a")
+        when "s"
+          i.vel = Pos.new(0,i.speed)
+          i.changeDir("s")
+        when "d"
+          i.vel = Pos.new(i.speed,0)
+          i.changeDir("d")
+        when "e"
+          #this calls that ships shoot function which creates a bullet object and adds it to that ships bullets array
+          i.shoot()
+        when "x"
+          #this creates a new asteroid and adds it to the asteroids array
+          $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
+      end
     end
   end
 end
