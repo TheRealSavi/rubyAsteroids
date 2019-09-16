@@ -4,7 +4,7 @@ class Bullet
 
   def initialize(pos, vel, bullets, buffer)
     #i multiply the velocity by 3 so the bullet moves faster than the ship that shot it
-    @vel = Pos.new(vel.x * 3, vel.y * 3)
+    @vel = Pos.new(vel.x * 5, vel.y * 5)
     @color = 'red'
     @size = 16
     @pos = Pos.new(pos.x + buffer-@size/2, pos.y + buffer-@size/2)

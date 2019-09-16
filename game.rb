@@ -9,10 +9,11 @@ require_relative 'class/Com.rb'
 
 #this initializes the arrays
 $asteroids = []
-ships = []
+$ships = []
+$stop = false
 
 #this addes a new ship to the ships array so the game can be played lol
-ships.push(Ship.new(3, Pos.new(Window.width/2-20,Window.height-40),'lime'))
+$ships.push(Ship.new(3, Pos.new(Window.width/2,Window.height/2)))
 4.times do
   $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
 end
@@ -20,7 +21,7 @@ end
 #this is a ruby2d event that is called every time a key is pushed down. it gets passed the key that was pushed in the event var
 on :key_down do |event|
   #this goes through all the ships so they are all controlled at once
-  for i in ships
+  for i in $ships
     #if the current ship isnt animating then check for keys
     if i.lerps == 0
       case event.key
@@ -45,6 +46,8 @@ on :key_down do |event|
         when "x"
           #this creates a new asteroid and adds it to the asteroids array
           $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
+        when "l"
+          i.addHealth(1)
       end
     end
   end
@@ -52,21 +55,21 @@ end
 
 #this is a ruby2d event that is called every frame
 update do
+  if !$stop
+    #this calls all the asteroids update functions
+    for i in $asteroids
+      i.update()
+    end
 
-  #this calls all the asteroids update functions
-  for i in $asteroids
-    i.update()
-  end
-
-  #this loops through all ships
-  for i in ships
-    i.update()
-    #this loops through the current ships bullets
-    for j in i.bullets
-      j.update()
+    #this loops through all ships
+    for i in $ships
+      i.update()
+      #this loops through the current ships bullets
+      for j in i.bullets
+        j.update()
+      end
     end
   end
-  
 end
 
 #this is the ruby2d method that shows the window
