@@ -14,7 +14,12 @@ class Ship
     #this holds how many frams the ship has lerped for so it knows when to stop rotating
     @lerps = 0
     #this is how many pixels the ship moves per frame
+    @shotCount = 1
+    @dShotCount = @shotCount
     @speed = 2
+    @dSpeed = @speed
+    @powerUpTimer = 0
+    @tick = 0
     @size = 32
     @vel = Pos.new(0,0)
     #This is the ships array of bullets that hold holds all the bullet objects this ship creates
@@ -37,6 +42,10 @@ class Ship
       rotate: -90,
       z: 200
     )
+    #this is a number that appears on every asteroid that shows its position in the asteroids array
+    @id = Text.new(@powerUpTimer.to_s, x: @pos.x, y: @pos.y, z:202)
+    #shows the number
+    @id.remove
   end
 
   #this is called when the user presses a direction key, it is used to keep track of the current and old directions for lerping
@@ -80,9 +89,50 @@ class Ship
   #this gets called if the user presses the shoot key
   def shoot()
     #this added a new bullet object to the ships bullet array with the same position and velocity of the ship
-    @bullets.push(Bullet.new(Pos.new(@pos.x,@pos.y),Pos.new(@vel.x,@vel.y),@bullets,@size/2))
+    for i in 1..@shotCount
+      @bullets.push(Bullet.new(Pos.new(@pos.x + (i-1)*16,@pos.y + (i-1)*16),Pos.new(@vel.x,@vel.y),@bullets,@size/2, self))
+    end
   end
 
+  def clearPowerUps()
+    @speed = @dSpeed
+    if @vel.x == 0
+      if @vel.y <= 0
+        @vel.y = -@speed
+      else
+        @vel.y = @speed
+      end
+    elsif @vel.x <= 0
+      @vel.x = -@speed
+    else
+      @vel.x = @speed
+    end
+    @shotCount = @dShotCount
+    @model.color = [1,1,1,1]
+  end
+
+  def powerUp(type, tint)
+    if type != 'None'
+      case type
+      when 'Speed'
+        self.clearPowerUps()
+        @speed *= 3
+        @vel.x *= 3
+        @vel.y *= 3
+        @model.color = tint
+        @powerUpTimer = 7
+      when '1Up'
+        self.addHealth(1)
+      when 'Tripple'
+        self.clearPowerUps()
+        @shotCount *=3
+        @model.color = tint
+        @powerUpTimer = 12
+      else
+        puts 'Undefinded Powerup : ' + type
+      end
+    end
+  end
 
   def collide()
     #first it runs through all the asteroids and checks if itself is inside one
@@ -101,8 +151,13 @@ class Ship
         @health-=1
         if @health >=1
           @pos = Pos.new(Window.width/2,Window.height/2)
+          @model.color = [1,1,1,1]
           @healthModels[@health].remove
           @healthModels.delete(@healthModels[@health])
+          self.clearPowerUps()
+          @powerUpTimer = 0
+          @id.remove
+          @vel = Pos.new(0,0)
         else
           @healthModels[@health].remove
           @healthModels.delete(@healthModels[@health])
@@ -121,6 +176,24 @@ class Ship
   #this gets called every frame by the windows update method
   #it calls the ships move method and then updates the models position to match the new decided position
   def update()
+
+    if @powerUpTimer >= 1
+      @id.remove
+      #this updates the text to whatever positon it might be in now
+      @id = Text.new(@powerUpTimer.to_s, x: @pos.x, y: @pos.y, z:202)
+      #this redisplays the text
+      @id.add
+
+      @tick += 1
+      if @tick % 60 == 0
+        @powerUpTimer-=1
+        if @powerUpTimer <= 0
+          self.clearPowerUps()
+          @id.remove
+        end
+      end
+    end
+
     self.collide()
     self.move()
 

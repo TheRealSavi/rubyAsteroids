@@ -1,12 +1,12 @@
 class Bullet
   #This allows read and write access to these variables when called outside of the class
-  attr_accessor :pos, :model, :vel, :color, :size
+  attr_accessor :pos, :model, :vel, :size
 
-  def initialize(pos, vel, bullets, buffer)
+  def initialize(pos, vel, bullets, buffer, ship)
     #i multiply the velocity by 3 so the bullet moves faster than the ship that shot it
     @vel = Pos.new(vel.x * 5, vel.y * 5)
-    @color = 'red'
     @size = 16
+    @ship = ship
     @pos = Pos.new(pos.x + buffer-@size/2, pos.y + buffer-@size/2)
     @bullets = bullets
     #here is the bullets model object
@@ -34,6 +34,7 @@ class Bullet
       @model.y + @size <= k.pos.y + k.size
       )
         #if it detects it is in an asteroid it calls that asteroids split function and then kills itself
+        @ship.powerUp(k.type,k.tint[k.type])
         k.split()
         self.kill()
       end

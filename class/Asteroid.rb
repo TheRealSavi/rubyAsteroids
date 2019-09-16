@@ -1,16 +1,32 @@
 class Asteroid
   #read and writes outside of class
-  attr_accessor :size, :pos
+  attr_accessor :size, :pos, :type, :tint
 
   def initialize(size, pos)
     @size = size
     @pos = pos
     @vel = Pos.new(rand(-0.35..0.35),rand(-0.35..0.35))
+
+    @types = ['Tripple','Speed','1Up']
+    @tint = {
+      'Tripple' => [0.98, 0.93, 0.30, 1],
+      'Speed'   => [0.98, 0.36, 0.30, 1],
+      '1Up'     => [0.30, 0.98, 0.49, 1],
+      'None'    => [1.00, 1.00, 1.00, 1]
+    }
+
+    if rand(1..100) >= 0
+      @type = @types.sample()
+    else
+      @type = 'None'
+    end
+
     #asteroids model
     @model = Image.new(
       'imgs/asteroid.png',
       x: @pos.x, y: @pos.y,
       width: @size, height: @size,
+      color: @tint[@type],
       rotate: 0,
       z: 101
     )
@@ -68,7 +84,7 @@ class Asteroid
     #this gets rid of the text on the asteroid that shows its postion in the array
     @id.remove
     #this updates the text to whatever positon it might be in now
-    @id = Text.new($asteroids.index(self).to_s, x: @pos.x, y: @pos.y, z:102)
+    @id = Text.new(@type.to_s, x: @pos.x, y: @pos.y, z:100)
     #this redisplays the text
     @id.add
   end
