@@ -5,7 +5,9 @@ class Bullet
   def initialize(pos, vel, bullets, buffer, ship)
     @ship = ship
     @bullets = bullets
+    
     @speed = 10
+    @size = 16
 
     case ship.dir
     when 0
@@ -18,7 +20,6 @@ class Bullet
       @vel = Pos.new(0,-@speed)
     end
 
-    @size = 16
     @pos = Pos.new(pos.x + buffer-@size/2, pos.y + buffer-@size/2)
 
     #here is the bullets model object
