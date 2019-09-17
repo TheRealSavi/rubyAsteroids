@@ -39,6 +39,7 @@ class Bullet
         #it sends the ship that shot it its powerup value and tint so the ship can interpret it
         @ship.powerUp(k.type,k.tint[k.type])
         k.split()
+        @ship.points += 1
         self.kill()
       end
     end

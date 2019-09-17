@@ -1,12 +1,13 @@
 class Ship
   #This allows read and write access to these variables when called outside of the class
-  attr_accessor :pos, :model, :rot, :vel, :bullets, :speed, :size, :lerp, :lerps, :lastDir
+  attr_accessor :pos, :model, :rot, :vel, :bullets, :speed, :size, :lerp, :lerps, :lastDir, :points
 
   def initialize(health, pos)
     @health = health
     @pos = pos
     @vel = Pos.new(0,0)
     @size = 32
+    @points = 0
 
     #this tells the ship how many degrees to rotate when lerping
     @lerp = 0
@@ -59,6 +60,8 @@ class Ship
     @id = Text.new(@powerUpTimer.to_s, x: @pos.x, y: @pos.y, z:202)
     @id.remove
 
+    #this displays the points for the ship in the bottom left
+    @pointModel = Text.new(@points.to_s, x: 0, y: Window.height-20, z:255, size:20)
   end
 
   #this is called when the user presses a direction key, it is used to keep track of the current and old directions for lerping
@@ -254,5 +257,9 @@ class Ship
     self.collideCheck()
     self.move()
     self.modelLerp()
+
+    @pointModel.remove
+    @pointModel = Text.new('Points:' + @points.to_s, x: 0, y: Window.height-20, z:255, size:20)
+    @pointModel.add
   end
 end
