@@ -1,6 +1,6 @@
 class Ship
   #This allows read and write access to these variables when called outside of the class
-  attr_accessor :pos, :model, :rot, :vel, :bullets, :speed, :size, :lerp, :lerps, :lastDir, :points
+  attr_accessor :pos, :model, :dir, :vel, :bullets, :speed, :size, :lerp, :lerps, :lastDir, :points
 
   def initialize(health, pos)
     @health = health
@@ -108,7 +108,7 @@ class Ship
       self.changeDir(90)
     end
   end
-  
+
     #this moves the ship by its velocity
     @pos.x += @vel.x
     @pos.y += @vel.y

@@ -5,8 +5,19 @@ class Bullet
   def initialize(pos, vel, bullets, buffer, ship)
     @ship = ship
     @bullets = bullets
+    @speed = 10
 
-    @vel = Pos.new(vel.x * 5, vel.y * 5)
+    case ship.dir
+    when 0
+      @vel = Pos.new(@speed,0)
+    when 90
+      @vel = Pos.new(0,@speed)
+    when 180
+      @vel = Pos.new(-@speed,0)
+    when 270
+      @vel = Pos.new(0,-@speed)
+    end
+
     @size = 16
     @pos = Pos.new(pos.x + buffer-@size/2, pos.y + buffer-@size/2)
 
