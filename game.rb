@@ -1,4 +1,5 @@
 require 'ruby2d'
+
 set width: 1280, height:720
 set title: "Asteroids", fullscreen:false, background: '#061c2b'
 
@@ -17,7 +18,7 @@ $lifeUp    = Sound.new('sounds/1up.mp3')
 $speedUp   = Sound.new('sounds/speedUp.mp3')
 $downgrade = Sound.new('sounds/downgrade.mp3')
 
-#initializes globals
+#initializes global variables
 $asteroids = []
 $ships = []
 $stop = false
@@ -34,7 +35,7 @@ end
 on :key_down do |event|
   #this goes through all the ships so they are all controlled at once
   for i in $ships
-    #if the current ship isnt animating then check for keys
+    #if the current ship isnt animating then check for key input
     if i.lerps == 0
       case event.key
         when "w"
@@ -65,23 +66,15 @@ end
 #this is a ruby2d event that is called every frame
 update do
   if !$stop
-
-    #this calls all the asteroids update functions
     for i in $asteroids
-      i.update()
+      i.update()           #this calls all the asteroids update functions
     end
-
-    #this updates all the ships
     for i in $ships
-      i.update()
-
-      #this updates all the ships bullets
+      i.update()           #this updates all the ships
       for j in i.bullets
-        j.update()
+        j.update()         #this updates all the ships bullets
       end
-
     end
-
   end
 end
 

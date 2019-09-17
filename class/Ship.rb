@@ -233,19 +233,19 @@ class Ship
   #this gets called every frame by the ships update method
   #it manages the animation of the rotation of the ship
   def rotationLerp()
-    #how many frames it will take to complete the rotation (must be a multiple of 90)
-    # 1,2,3,5,6,9,10,15,18,30,45,90
+    #how many frames it will take to complete the rotation (must be a factor of 90)
+    # aka one of these 1,2,3,5,6,9,10,15,18,30,45,90
     steps = 6
-    step = CircleLerp.new(@lastDir,@dir,steps).calculate()
+    step = CircleLerp.new(@lastDir,@dir,steps).calculate() #returns how many degrees to turn per frame given steps
 
-    if @lerp == true
-      @lerps += 1
+    if @lerp == true      #lerp gets set to true everytime an arrow key is pressed
+      @lerps += 1         #counts how many steps it gone through
       @model.rotate += step
 
-      if @lerps >= steps
-        @lerps = 0
-        @lerp = false
-        @lastDir = @dir
+      if @lerps >= steps  #if its done lerping because it hit the said steps
+        @lerps = 0        #reset
+        @lerp = false     #finish lerping
+        @lastDir = @dir   #finalize direction
       end
 
     end
