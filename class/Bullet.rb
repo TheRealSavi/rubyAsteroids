@@ -1,14 +1,15 @@
 class Bullet
   #This allows read and write access to these variables when called outside of the class
-  attr_accessor :pos, :model, :vel, :size
+  attr_accessor :pos, :vel, :size
 
   def initialize(pos, vel, bullets, buffer, ship)
-    #i multiply the velocity by 3 so the bullet moves faster than the ship that shot it
+    @ship = ship
+    @bullets = bullets
+
     @vel = Pos.new(vel.x * 5, vel.y * 5)
     @size = 16
-    @ship = ship
     @pos = Pos.new(pos.x + buffer-@size/2, pos.y + buffer-@size/2)
-    @bullets = bullets
+
     #here is the bullets model object
     @model = Image.new(
       'imgs/bullet.png',
@@ -17,6 +18,7 @@ class Bullet
       rotate: 0,
       z: 99
     )
+
   end
 
   #this function gets called every frame by the update method
@@ -34,6 +36,7 @@ class Bullet
       @model.y + @size <= k.pos.y + k.size
       )
         #if it detects it is in an asteroid it calls that asteroids split function and then kills itself
+        #it sends the ship that shot it its powerup value and tint so the ship can interpret it
         @ship.powerUp(k.type,k.tint[k.type])
         k.split()
         self.kill()
@@ -64,6 +67,9 @@ class Bullet
     #this moves the bullet by the velocity of the bullet
     @pos.x += @vel.x
     @pos.y += @vel.y
+    #moves the bullets model
+    @model.x = @pos.x
+    @model.y = @pos.y
   end
 
   #this gets called every frame by the windows update method
@@ -72,8 +78,5 @@ class Bullet
     self.hit()
     #moves the bullet
     self.move()
-    #moves the bullets model
-    @model.x = @pos.x
-    @model.y = @pos.y
   end
 end

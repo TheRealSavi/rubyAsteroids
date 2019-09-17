@@ -5,25 +5,36 @@ class Ship
   def initialize(health, pos)
     @health = health
     @pos = pos
+    @vel = Pos.new(0,0)
+    @size = 32
+
     #this tells the ship how many degrees to rotate when lerping
     @lerp = 0
+    #this holds how many frames the ship has lerped for so it knows when to stop rotating
+    @lerps = 0
+
     #this holds the last direction the ship was moving so it knows what angle to lerp from
     @lastDir = ""
     #this holds the ships new direction so it knows where to lerp to
     @dir = "w"
-    #this holds how many frams the ship has lerped for so it knows when to stop rotating
-    @lerps = 0
-    #this is how many pixels the ship moves per frame
+
+    #this is how many bullets are made when the shoot key is pressed
+    #d versions of variables hold the defualt version of the var so it can be reverted to later
     @shotCount = 1
     @dShotCount = @shotCount
+
+    #this is how many pixels it moves per frame
     @speed = 2
     @dSpeed = @speed
+
+    #these are for deciding when powerups shold end
     @powerUpTimer = 0
     @tick = 0
-    @size = 32
-    @vel = Pos.new(0,0)
-    #This is the ships array of bullets that hold holds all the bullet objects this ship creates
+
+    #This is the ships array of bullets that holds all the bullet objects this ship creates
     @bullets = []
+
+    #this is how the ship displays how many lives it has in the top left
     @healthModels = []
     for i in 0..@health-1
       @healthModels.push(Image.new(
@@ -34,6 +45,7 @@ class Ship
         z: 200
       ))
     end
+
     #This is the ships model object so that there is something to actually display
     @model = Image.new(
       'imgs/ship.png',
@@ -42,10 +54,11 @@ class Ship
       rotate: -90,
       z: 200
     )
-    #this is a number that appears on every asteroid that shows its position in the asteroids array
+
+    #this is the number that appears to show when a powerup will end
     @id = Text.new(@powerUpTimer.to_s, x: @pos.x, y: @pos.y, z:202)
-    #shows the number
     @id.remove
+
   end
 
   #this is called when the user presses a direction key, it is used to keep track of the current and old directions for lerping
@@ -54,6 +67,7 @@ class Ship
     @dir = newDir
   end
 
+  #this is called when a new life is added to the ship it is used to create another model for the top left health display
   def addHealth(add)
     @health += add
     add.times do
@@ -84,17 +98,22 @@ class Ship
     #this moves the ship by its velocity
     @pos.x += @vel.x
     @pos.y += @vel.y
+    #this updates the models postion to the position made by the move function
+    @model.x = @pos.x
+    @model.y = @pos.y
   end
 
   #this gets called if the user presses the shoot key
   def shoot()
-    #this added a new bullet object to the ships bullet array with the same position and velocity of the ship
+    #this adda a new bullet object to the ships bullet array with the same position and velocity of the ship
     $pew.play
     for i in 1..@shotCount
       @bullets.push(Bullet.new(Pos.new(@pos.x + (i-1)*16,@pos.y + (i-1)*16),Pos.new(@vel.x,@vel.y),@bullets,@size/2, self))
     end
   end
 
+  #this is called whenever the ships powerup informarion needs to be reset
+  #it reverts to default speed and shotcount, re evaluates current velocity, and returns to standard color
   def clearPowerUps()
     @speed = @dSpeed
     if @vel.x == 0
@@ -112,6 +131,7 @@ class Ship
     @model.color = [1,1,1,1]
   end
 
+  #this is called by the bullet object when it detects it has hit an asteroid
   def powerUp(type, tint)
     if type != 'None'
       case type
@@ -138,7 +158,9 @@ class Ship
     end
   end
 
-  def collide()
+  #this checks if the ship has colided with an asteroid
+  #it gets called everyframe by the ships update method
+  def collideCheck()
     #first it runs through all the asteroids and checks if itself is inside one
     for k in $asteroids
       if (
@@ -151,9 +173,10 @@ class Ship
       @model.y + @size >= k.pos.y &&
       @model.y + @size <= k.pos.y + k.size
       )
-        #if it detects it is in an asteroid it removes one health or dies
+        #if it detects it is in an asteroid it removes one health
         @health-=1
         if @health >=1
+          #if it still has lives left it returns to the center and has everything reset
           @pos = Pos.new(Window.width/2,Window.height/2)
           @model.color = [1,1,1,1]
           @healthModels[@health].remove
@@ -164,9 +187,10 @@ class Ship
           @vel = Pos.new(0,0)
           $crash.play
         else
+          #if it has no more lives then it stops the windows update method and displays game over
           @healthModels[@health].remove
           @healthModels.delete(@healthModels[@health])
-          gameOver = Text.new('GAME OVER', x: 20, y:0)
+          gameOver = Text.new('GAME OVER', x: 0, y: Window.height/2, z: 255, size: 32)
           gameOver.add
           $crash.play
           self.kill()
@@ -175,35 +199,36 @@ class Ship
     end
   end
 
+  #this gets called when the ship has no more lives
   def kill()
     $stop = true
   end
 
-  #this gets called every frame by the windows update method
-  #it calls the ships move method and then updates the models position to match the new decided position
-  def update()
-
+  def powerUpCheck()
+    #this checks if there is a powerup active
     if @powerUpTimer >= 1
+      #this updates the text to the seconds left on the powerup
       @id.remove
-      #this updates the text to whatever positon it might be in now
-      @id = Text.new(@powerUpTimer.to_s, x: @pos.x, y: @pos.y, z:202)
-      #this redisplays the text
+      @id = Text.new(@powerUpTimer.to_s, x: @pos.x-10, y: @pos.y-10, z:202, size:12)
       @id.add
 
+      #this checks if it has been a second (60 frames)
       @tick += 1
       if @tick % 60 == 0
         @powerUpTimer-=1
         if @powerUpTimer <= 0
+          #this removes the powerup if there is no time left
           $downgrade.play
           self.clearPowerUps()
           @id.remove
         end
       end
     end
+  end
 
-    self.collide()
-    self.move()
-
+  #this gets called every frame by the ships update method
+  #it manages the animation of the rotation of the ship
+  def modelLerp()
     #this asks the lerp table to know how many degrees to rotate per fram for 10 frames until it has rotated to the new direction
     @lerp = LerpTable.new(@lastDir,@dir).calculate()
     #this checks if it needs to lerp
@@ -220,9 +245,14 @@ class Ship
         @lastDir = @dir
       end
     end
+  end
 
-    #this updates the models postion to the position made by the move function
-    @model.x = @pos.x
-    @model.y = @pos.y
+  #this gets called every frame by the windows update method
+  #it calls the ships move method and then updates the models position to match the new decided position
+  def update()
+    self.powerUpCheck()
+    self.collideCheck()
+    self.move()
+    self.modelLerp()
   end
 end

@@ -1,12 +1,14 @@
 require 'ruby2d'
 set width: 1280, height:720
-set title: "Asteroids", fullscreen:true, background: '#061c2b'
+set title: "Asteroids", fullscreen:false, background: '#061c2b'
 
+#imports classes
 require_relative 'class/Asteroid.rb'
 require_relative 'class/Bullet.rb'
 require_relative 'class/Ship.rb'
 require_relative 'class/Com.rb'
 
+#imports sounds
 $pew       = Sound.new('sounds/pew.mp3')
 $crash     = Sound.new('sounds/crash.mp3')
 $boom      = Sound.new('sounds/boom.mp3')
@@ -15,13 +17,15 @@ $lifeUp    = Sound.new('sounds/1up.mp3')
 $speedUp   = Sound.new('sounds/speedUp.mp3')
 $downgrade = Sound.new('sounds/downgrade.mp3')
 
-#this initializes the arrays
+#initializes globals
 $asteroids = []
 $ships = []
 $stop = false
 
 #this addes a new ship to the ships array so the game can be played lol
 $ships.push(Ship.new(3, Pos.new(Window.width/2,Window.height/2)))
+
+#adds a couple asteroids
 4.times do
   $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
 end
@@ -34,10 +38,6 @@ on :key_down do |event|
     if i.lerps == 0
       case event.key
         when "w"
-          #this is to change the current ships velocity to a new vector that has a value of 0 in the x
-          #and a negative version of the ships speed in the y
-          #then it changes the ships direction identifier to the new direction
-          #it is the same idea for all the other velocity changes
           i.vel = Pos.new(0,-i.speed)
           i.changeDir("w")
         when "a"
@@ -55,6 +55,7 @@ on :key_down do |event|
           #this creates a new asteroid and adds it to the asteroids array
           $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
         when "l"
+          #this adds a life to the ship
           i.addHealth(1)
       end
     end
@@ -64,19 +65,23 @@ end
 #this is a ruby2d event that is called every frame
 update do
   if !$stop
+
     #this calls all the asteroids update functions
     for i in $asteroids
       i.update()
     end
 
-    #this loops through all ships
+    #this updates all the ships
     for i in $ships
       i.update()
-      #this loops through the current ships bullets
+
+      #this updates all the ships bullets
       for j in i.bullets
         j.update()
       end
+
     end
+
   end
 end
 

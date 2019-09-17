@@ -2,7 +2,7 @@
 class Pos
   #this allows read and writes of the x and y
   attr_accessor :x, :y
-  #this defines the vectors x and y
+  #this defines the vector of x and y
   def initialize(x,y)
     @x = x
     @y = y

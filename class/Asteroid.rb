@@ -7,14 +7,17 @@ class Asteroid
     @pos = pos
     @vel = Pos.new(rand(-0.35..0.35),rand(-0.35..0.35))
 
+    #this defines the powerups the asteroid could get and those powerups colors
     @types = ['Triple','Speed','1Up']
     @tint = {
       'Triple' => [0.98, 0.93, 0.30, 1],
-      'Speed'   => [0.98, 0.36, 0.30, 1],
-      '1Up'     => [0.30, 0.98, 0.49, 1],
-      'None'    => [1.00, 1.00, 1.00, 1]
+      'Speed'  => [0.98, 0.36, 0.30, 1],
+      '1Up'    => [0.30, 0.98, 0.49, 1],
+      'None'   => [1.00, 1.00, 1.00, 1]
     }
 
+    #this is the way the asteroid decides whether it should get a powerup or not
+    #the value is the percentage of not having a powerup
     if rand(1..100) >= 75
       @type = @types.sample()
     else
@@ -30,11 +33,6 @@ class Asteroid
       rotate: 0,
       z: 101
     )
-
-    #this is a number that appears on every asteroid that shows its position in the asteroids array
-    @id = Text.new($asteroids.index(self).to_s, x: @pos.x, y: @pos.y, z:102)
-    #shows the number
-    @id.add
   end
 
   #this gets called by a bullet when the bullet detects it has hit this asteroid
@@ -58,8 +56,6 @@ class Asteroid
     $asteroids.delete(self)
     #this gets rid of the model from the window
     @model.remove
-    #this gets rid of the text on the asteroid that shows its postion in the array
-    @id.remove
   end
 
   def move()
@@ -69,7 +65,7 @@ class Asteroid
     @model.y >= Window.height-@size ||
     @model.y <= 0
     )
-      #if the ship isnt in a valid position to complete its user decide move it will just reverse the direction and bounce
+      #if the asteroid isnt in a valid position to complete its move it will just reverse the direction and bounce
       @vel.x = -@vel.x
       @vel.y = -@vel.y
     end
@@ -81,12 +77,7 @@ class Asteroid
 
   #this gets called every fram by the windows update method
   def update()
+    #moves the asteroid
     self.move()
-    #this gets rid of the text on the asteroid that shows its postion in the array
-    @id.remove
-    #this updates the text to whatever positon it might be in now
-    @id = Text.new(@type.to_s, x: @pos.x, y: @pos.y, z:100)
-    #this redisplays the text
-    @id.add
   end
 end
