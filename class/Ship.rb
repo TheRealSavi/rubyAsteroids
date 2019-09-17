@@ -87,18 +87,28 @@ class Ship
 
 
   #This gets called every frame by the ships update method
-  #It first checks if the ship is in a valid position to move and then moves it
+  #It first checks if the ship is in a valid position to move
+  #if its not if turns it around otherwise it just goes
   def move()
-    if (
-    @model.x >= Window.width-@size ||
-    @model.x <= 0 ||
-    @model.y >= Window.height-@size ||
-    @model.y <= 0
-    )
-      #if the ship isnt in a valid position to complete its user decide move it will just reverse the direction and bounce
-      @vel.x = -@vel.x
-      @vel.y = -@vel.y
+  if @lerps == 0
+    if @model.x >= Window.width-@size
+      @vel = Pos.new(-@speed,0)
+      self.changeDir(180)
     end
+    if @model.x <= 0
+      @vel = Pos.new(@speed,0)
+      self.changeDir(0)
+    end
+    if @model.y >= Window.height-@size
+      @vel = Pos.new(0,-@speed)
+      self.changeDir(270)
+    end
+    if @model.y <= 0
+      @vel = Pos.new(0,@speed)
+      self.changeDir(90)
+    end
+  end
+  
     #this moves the ship by its velocity
     @pos.x += @vel.x
     @pos.y += @vel.y
