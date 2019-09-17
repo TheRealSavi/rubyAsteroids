@@ -89,6 +89,7 @@ class Ship
   #this gets called if the user presses the shoot key
   def shoot()
     #this added a new bullet object to the ships bullet array with the same position and velocity of the ship
+    $pew.play
     for i in 1..@shotCount
       @bullets.push(Bullet.new(Pos.new(@pos.x + (i-1)*16,@pos.y + (i-1)*16),Pos.new(@vel.x,@vel.y),@bullets,@size/2, self))
     end
@@ -115,6 +116,7 @@ class Ship
     if type != 'None'
       case type
       when 'Speed'
+        $speedUp.play
         self.clearPowerUps()
         @speed *= 3
         @vel.x *= 3
@@ -122,8 +124,10 @@ class Ship
         @model.color = tint
         @powerUpTimer = 7
       when '1Up'
+        $lifeUp.play
         self.addHealth(1)
-      when 'Tripple'
+      when 'Triple'
+        $triple.play
         self.clearPowerUps()
         @shotCount *=3
         @model.color = tint
@@ -158,11 +162,13 @@ class Ship
           @powerUpTimer = 0
           @id.remove
           @vel = Pos.new(0,0)
+          $crash.play
         else
           @healthModels[@health].remove
           @healthModels.delete(@healthModels[@health])
           gameOver = Text.new('GAME OVER', x: 20, y:0)
           gameOver.add
+          $crash.play
           self.kill()
         end
       end
@@ -188,6 +194,7 @@ class Ship
       if @tick % 60 == 0
         @powerUpTimer-=1
         if @powerUpTimer <= 0
+          $downgrade.play
           self.clearPowerUps()
           @id.remove
         end

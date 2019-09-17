@@ -7,15 +7,15 @@ class Asteroid
     @pos = pos
     @vel = Pos.new(rand(-0.35..0.35),rand(-0.35..0.35))
 
-    @types = ['Tripple','Speed','1Up']
+    @types = ['Triple','Speed','1Up']
     @tint = {
-      'Tripple' => [0.98, 0.93, 0.30, 1],
+      'Triple' => [0.98, 0.93, 0.30, 1],
       'Speed'   => [0.98, 0.36, 0.30, 1],
       '1Up'     => [0.30, 0.98, 0.49, 1],
       'None'    => [1.00, 1.00, 1.00, 1]
     }
 
-    if rand(1..100) >= 0
+    if rand(1..100) >= 75
       @type = @types.sample()
     else
       @type = 'None'
@@ -39,6 +39,7 @@ class Asteroid
 
   #this gets called by a bullet when the bullet detects it has hit this asteroid
   def split()
+    $boom.play
     #if the asteroid is too small to split then it will kill itself
     if @size <= 32
       self.kill()
@@ -46,8 +47,8 @@ class Asteroid
       #if it is good to go then the size will be halved, kill itself, ans create two new asteroids
       @size = @size/2
       self.kill()
-      $asteroids.push(Asteroid.new(@size, Pos.new(rand(@pos.x-64..@pos.x+64).clamp(0,Window.width),rand(@pos.y-64..@pos.y+64).clamp(0,Window.height))))
-      $asteroids.push(Asteroid.new(@size, Pos.new(rand(@pos.x-64..@pos.x+64).clamp(0,Window.width),rand(@pos.y-64..@pos.y+64).clamp(0,Window.height))))
+      $asteroids.push(Asteroid.new(@size, Pos.new(rand(@pos.x-64..@pos.x+64).clamp(0,Window.width-@size),rand(@pos.y-64..@pos.y+64).clamp(0,Window.height-@size))))
+      $asteroids.push(Asteroid.new(@size, Pos.new(rand(@pos.x-64..@pos.x+64).clamp(0,Window.width-@size),rand(@pos.y-64..@pos.y+64).clamp(0,Window.height-@size))))
     end
   end
 

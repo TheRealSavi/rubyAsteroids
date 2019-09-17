@@ -7,6 +7,14 @@ require_relative 'class/Bullet.rb'
 require_relative 'class/Ship.rb'
 require_relative 'class/Com.rb'
 
+$pew       = Sound.new('sounds/pew.mp3')
+$crash     = Sound.new('sounds/crash.mp3')
+$boom      = Sound.new('sounds/boom.mp3')
+$triple    = Sound.new('sounds/triple.mp3')
+$lifeUp    = Sound.new('sounds/1up.mp3')
+$speedUp   = Sound.new('sounds/speedUp.mp3')
+$downgrade = Sound.new('sounds/downgrade.mp3')
+
 #this initializes the arrays
 $asteroids = []
 $ships = []
