@@ -9,59 +9,30 @@ class Pos
   end
 end
 
-#this is the fucking LerpTable
-#it knows how to do shit
-class LerpTable
-  def initialize(lastVal, newVal)
-    @l = lastVal
-    @n = newVal
+#this is the circular lerping function
+#it calculates the shortest path to get between two points on a circle and then divides that into equal rotations over time
+class CircleLerp
+
+  def initialize(start, stop, time)
+    @start = start
+    @stop = stop
+    @time = time
   end
+
   def calculate()
-    case @l
-    when "w"
-      case @n
-      when "w"
-        return 0
-      when "a"
-        return -9
-      when "s"
-        return 18
-      when "d"
-        return 9
+    delta = @stop - @start
+
+    if 360-delta.abs < delta.abs
+      if 360-delta > 360
+        direction = 1
+      else
+        direction = -1
       end
-    when "a"
-      case @n
-      when "a"
-        return 0
-      when "w"
-        return 9
-      when "s"
-        return -9
-      when "d"
-        return 18
-      end
-    when "s"
-      case @n
-      when "s"
-        return 0
-      when "w"
-        return 18
-      when "a"
-        return 9
-      when "d"
-        return -9
-      end
-    when "d"
-      case @n
-      when "d"
-        return 0
-      when "w"
-        return -9
-      when "a"
-        return 18
-      when "s"
-        return 9
-      end
+      delta = (360-delta.abs)*direction
     end
+
+    step = delta/@time
+    return step
+
   end
 end

@@ -9,15 +9,15 @@ class Ship
     @size = 32
     @points = 0
 
-    #this tells the ship how many degrees to rotate when lerping
-    @lerp = 0
+    #says if it should calculate a lerp or not
+    @lerp = false
     #this holds how many frames the ship has lerped for so it knows when to stop rotating
     @lerps = 0
 
     #this holds the last direction the ship was moving so it knows what angle to lerp from
-    @lastDir = ""
+    @lastDir = 0
     #this holds the ships new direction so it knows where to lerp to
-    @dir = "w"
+    @dir = 270
 
     #this is how many bullets are made when the shoot key is pressed
     #d versions of variables hold the defualt version of the var so it can be reverted to later
@@ -42,7 +42,7 @@ class Ship
         'imgs/ship.png',
         x: i*@size+20, y: 0,
         width: @size, height: @size,
-        rotate: -90,
+        rotate: @dir,
         z: 200
       ))
     end
@@ -52,7 +52,7 @@ class Ship
       'imgs/ship.png',
       x: @pos.x, y: @pos.y,
       width: @size, height: @size,
-      rotate: -90,
+      rotate: 270,
       z: 200
     )
 
@@ -68,6 +68,7 @@ class Ship
   def changeDir(newDir)
     @lastDir = @dir
     @dir = newDir
+    @lerp = true
   end
 
   #this is called when a new life is added to the ship it is used to create another model for the top left health display
@@ -78,7 +79,7 @@ class Ship
         'imgs/ship.png',
         x: @healthModels.count()*@size+20, y: 0,
         width: @size, height: @size,
-        rotate: -90,
+        rotate: 270,
         z: 200
       ))
     end
@@ -231,22 +232,22 @@ class Ship
 
   #this gets called every frame by the ships update method
   #it manages the animation of the rotation of the ship
-  def modelLerp()
-    #this asks the lerp table to know how many degrees to rotate per fram for 10 frames until it has rotated to the new direction
-    @lerp = LerpTable.new(@lastDir,@dir).calculate()
-    #this checks if it needs to lerp
-    if @lerp != 0 && @lerp != nil
-      #iterates the frames lerped by one so it knows when to stop
+  def rotationLerp()
+    #how many frames it will take to complete the rotation (must be a multiple of 90)
+    # 1,2,3,5,6,9,10,15,18,30,45,90
+    steps = 6
+    step = CircleLerp.new(@lastDir,@dir,steps).calculate()
+
+    if @lerp == true
       @lerps += 1
-      #this rotates the model by the degree specified by the LerpTable
-      @model.rotate += @lerp
-      #checks if its done lerping yet
-      if @lerps >= 10
-        #if it is it resets everything for next time and says that the last direction is now its current direction
+      @model.rotate += step
+
+      if @lerps >= steps
         @lerps = 0
-        @lerp = 0
+        @lerp = false
         @lastDir = @dir
       end
+
     end
   end
 
@@ -256,7 +257,7 @@ class Ship
     self.powerUpCheck()
     self.collideCheck()
     self.move()
-    self.modelLerp()
+    self.rotationLerp()
 
     @pointModel.remove
     @pointModel = Text.new('Points:' + @points.to_s, x: 0, y: Window.height-20, z:255, size:20)

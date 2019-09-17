@@ -39,16 +39,16 @@ on :key_down do |event|
       case event.key
         when "w"
           i.vel = Pos.new(0,-i.speed)
-          i.changeDir("w")
+          i.changeDir(270)
         when "a"
           i.vel = Pos.new(-i.speed,0)
-          i.changeDir("a")
+          i.changeDir(180)
         when "s"
           i.vel = Pos.new(0,i.speed)
-          i.changeDir("s")
+          i.changeDir(90)
         when "d"
           i.vel = Pos.new(i.speed,0)
-          i.changeDir("d")
+          i.changeDir(0)
         when "e"
           i.shoot()
         when "x"
