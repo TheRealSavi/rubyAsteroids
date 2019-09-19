@@ -9,4 +9,3 @@ Add explosion animations for exploding asteroids?
 
 Bugs to fix:
 Spamming direction keys makes the ship model face the wrong way
-If the ships not moving bullets won’t move (add a default velocity)
