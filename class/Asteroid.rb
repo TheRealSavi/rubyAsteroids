@@ -77,7 +77,6 @@ class Asteroid
 
   #this gets called every fram by the windows update method
   def update()
-    #moves the asteroid
     self.move()
   end
 end

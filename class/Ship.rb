@@ -1,13 +1,24 @@
 class Ship
   #This allows read and write access to these variables when called outside of the class
-  attr_accessor :pos, :model, :dir, :vel, :bullets, :speed, :size, :lerp, :lerps, :lastDir, :points
+  attr_accessor :pos, :model, :dir, :vel, :bullets, :speed, :size, :lerp, :lerps, :lastDir, :points, :controls, :Control
 
-  def initialize(health, pos)
+  def initialize(health, pos, controls, shipID)
     @health = health
     @pos = pos
     @vel = Pos.new(0,0)
     @size = 32
     @points = 0
+
+    @shipID = shipID
+
+    @controls = controls
+    @Control = {
+      "forward" => @controls[0],
+      "left" => @controls[1],
+      "backward" => @controls[2],
+      "right" => @controls[3],
+      "shoot" => @controls[4]
+    }
 
     #says if it should calculate a lerp or not
     @lerp = false
@@ -40,7 +51,7 @@ class Ship
     for i in 0..@health-1
       @healthModels.push(Image.new(
         'imgs/ship.png',
-        x: i*@size+20, y: 0,
+        x: i*@size+20, y: @size * @shipID,
         width: @size, height: @size,
         rotate: @dir,
         z: 200
@@ -77,7 +88,7 @@ class Ship
     add.times do
       @healthModels.push(Image.new(
         'imgs/ship.png',
-        x: @healthModels.count()*@size+20, y: 0,
+        x: @healthModels.count * @size + 20, y: @size * @shipID,
         width: @size, height: @size,
         rotate: 270,
         z: 200
@@ -204,7 +215,7 @@ class Ship
           #if it has no more lives then it stops the windows update method and displays game over
           @healthModels[@health].remove
           @healthModels.delete(@healthModels[@health])
-          gameOver = Text.new('GAME OVER', x: 0, y: Window.height/2, z: 255, size: 32)
+          gameOver = Text.new('GAME OVER', x: Window.width/2-100, y: Window.height/2, z: 255, size: 32)
           gameOver.add
           $crash.play
           self.kill()
@@ -270,7 +281,7 @@ class Ship
     self.rotationLerp()
 
     @pointModel.remove
-    @pointModel = Text.new('Points:' + @points.to_s, x: 0, y: Window.height-20, z:255, size:20)
+    @pointModel = Text.new('Player ' + (@shipID + 1).to_s + ' Points:' + @points.to_s, x: 0, y: Window.height-(20 * (@shipID+1)), z:255, size:20)
     @pointModel.add
   end
 end
