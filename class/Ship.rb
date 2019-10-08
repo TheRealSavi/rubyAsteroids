@@ -1,6 +1,6 @@
 class Ship
   #This allows read and write access to these variables when called outside of the class
-  attr_accessor :pos, :model, :dir, :vel, :bullets, :speed, :size, :lerp, :lerps, :lastDir, :points, :controls, :Control
+  attr_accessor :pos, :model, :dir, :vel, :bullets, :speed, :size, :lerp, :lerps, :lastDir, :points, :controls, :Control, :pointAdd
 
   def initialize(health, pos, controls, shipID)
     @health = health
@@ -8,6 +8,8 @@ class Ship
     @vel = Pos.new(0,0)
     @size = 32
     @points = 0
+    @pointAdd = 1
+    @dPointAdd = @pointAdd
 
     @shipID = shipID
 
@@ -84,15 +86,17 @@ class Ship
 
   #this is called when a new life is added to the ship it is used to create another model for the top left health display
   def addHealth(add)
-    @health += add
-    add.times do
-      @healthModels.push(Image.new(
-        'imgs/ship.png',
-        x: @healthModels.count * @size + 20, y: @size * @shipID,
-        width: @size, height: @size,
-        rotate: 270,
-        z: 200
-      ))
+    if @health < 5
+      @health += add
+      add.times do
+        @healthModels.push(Image.new(
+          'imgs/ship.png',
+          x: @healthModels.count * @size + 20, y: @size * @shipID,
+          width: @size, height: @size,
+          rotate: 270,
+          z: 200
+        ))
+      end
     end
   end
 
@@ -153,6 +157,7 @@ class Ship
       @vel.x = @speed
     end
     @shotCount = @dShotCount
+    @pointAdd = @dPointAdd
     @model.color = [1,1,1,1]
   end
 
@@ -164,6 +169,7 @@ class Ship
         $speedUp.play
         self.clearPowerUps()
         @speed *= 3
+        @pointAdd *=3
         @vel.x *= 3
         @vel.y *= 3
         @model.color = tint

@@ -5,7 +5,7 @@ class Bullet
   def initialize(pos, vel, bullets, buffer, ship)
     @ship = ship
     @bullets = bullets
-    
+
     @speed = 10
     @size = 16
 
@@ -51,7 +51,7 @@ class Bullet
         #it sends the ship that shot it its powerup value and tint so the ship can interpret it
         @ship.powerUp(k.type,k.tint[k.type])
         k.split()
-        @ship.points += 1
+        @ship.points += @ship.pointAdd
         self.kill()
       end
     end

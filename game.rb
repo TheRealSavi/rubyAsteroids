@@ -62,7 +62,6 @@ on :key_down do |event|
   end
 end
 
-
 #this is a ruby2d event that is called every frame
 update do
   if !$stop
