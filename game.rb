@@ -22,16 +22,17 @@ $lifeUp    = Sound.new('sounds/1up.mp3')
 $asteroids = []
 $ships = []
 $stop = false
+$wave = 0
+$waveUI = Text.new("")
 
 $setup = [
-  ["w","a","s","d","e"],
-  ["i","j","k","l","p"]
+  ["w","a","s","d","e"]#,
+ #["i","j","k","l","p"]
 ]
 
-#adds a couple asteroids
-2.times do |i|
+#adds the ships
+$setup.count.times do |i|
   $ships.push(Ship.new(3, Pos.new(Window.width/2,Window.height/2),$setup[i],i))
-  $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
 end
 
 #this is a ruby2d event that is called every time a key is pushed down. it gets passed the key that was pushed in the event var
@@ -61,18 +62,39 @@ on :key_down do |event|
   end
 end
 
+
 #this is a ruby2d event that is called every frame
 update do
   if !$stop
+
+    if $asteroids.length <= 0
+      $wave += 1
+
+      $waveUI.remove
+      $waveUI = Text.new($wave.to_s, x: Window.width-($wave.to_s.length * 80), y: Window.height-80, z:255, size:80, color: '#fc5656')
+      $waveUI.add
+
+      Thread.new {
+        ($wave*2).times do |i|
+          $waveUI.color = '#a4fc56'
+          $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
+          sleep(0.2)
+          $waveUI.color = '#fc5656'
+        end
+      }
+    end
+
     for i in $asteroids
       i.update()           #this calls all the asteroids update functions
     end
+
     for i in $ships
       i.update()           #this updates all the ships
       for j in i.bullets
         j.update()         #this updates all the ships bullets
       end
     end
+
   end
 end
 
