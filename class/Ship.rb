@@ -204,26 +204,22 @@ class Ship
       @model.y + @size >= k.pos.y &&
       @model.y + @size <= k.pos.y + k.size
       )
-        #if it detects it is in an asteroid it removes one health
+        #if it detects it is in an asteroid it removes one health and resets everything
         @health-=1
+        @pos = Pos.new(Window.width/2,Window.height/2)
+        @model.color = [1,1,1,1]
+        @healthModels[@health].remove
+        @healthModels.delete(@healthModels[@health])
+        self.clearPowerUps()
+        @powerUpTimer = 0
+        @id.remove
+        @vel = Pos.new(0,0)
+        $crash.play
         if @health >=1
-          #if it still has lives left it returns to the center and has everything reset
-          @pos = Pos.new(Window.width/2,Window.height/2)
-          @model.color = [1,1,1,1]
-          @healthModels[@health].remove
-          @healthModels.delete(@healthModels[@health])
-          self.clearPowerUps()
-          @powerUpTimer = 0
-          @id.remove
-          @vel = Pos.new(0,0)
-          $crash.play
+          #if it still has lives left
+
         else
-          #if it has no more lives then it stops the windows update method and displays game over
-          @healthModels[@health].remove
-          @healthModels.delete(@healthModels[@health])
-          gameOver = Text.new('GAME OVER', x: Window.width/2-100, y: Window.height/2, z: 255, size: 32)
-          gameOver.add
-          $crash.play
+          #if it has no more lives
           self.kill()
         end
       end
@@ -232,6 +228,8 @@ class Ship
 
   #this gets called when the ship has no more lives
   def kill()
+    gameOver = Text.new('GAME OVER', x: Window.width/2-100, y: Window.height/2, z: 255, size: 32)
+    gameOver.add
     $stop = true
   end
 

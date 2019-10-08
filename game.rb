@@ -26,7 +26,7 @@ $wave = 0
 $waveUI = Text.new("")
 
 $setup = [
-  ["w","a","s","d","e"]#,
+  ["w","a","s","d","e"],
  #["i","j","k","l","p"]
 ]
 
@@ -54,9 +54,6 @@ on :key_down do |event|
         i.changeDir(0)
       when i.Control["shoot"]
         i.shoot()
-      when "x"
-        #this creates a new asteroid and adds it to the asteroids array
-        $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
       end
     end
   end
