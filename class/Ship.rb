@@ -1,9 +1,10 @@
 class Ship
   #This allows read and write access to these variables when called outside of the class
-  attr_accessor :pos, :model, :dir, :vel, :bullets, :speed, :size, :lerp, :lerps, :lastDir, :points, :controls, :Control, :pointAdd
+  attr_accessor :pos, :model, :dir, :vel, :bullets, :speed, :size, :lerp, :lerps, :lastDir, :points, :controls, :Control, :pointAdd, :isDead
 
   def initialize(health, pos, controls, shipID)
     @health = health
+    @isDead = false
     @pos = pos
     @vel = Pos.new(0,0)
     @size = 32
@@ -15,11 +16,12 @@ class Ship
 
     @controls = controls
     @Control = {
-      "forward" => @controls[0],
-      "left" => @controls[1],
+      "forward"  => @controls[0],
+      "left"     => @controls[1],
       "backward" => @controls[2],
-      "right" => @controls[3],
-      "shoot" => @controls[4]
+      "right"    => @controls[3],
+      "shoot"    => @controls[4],
+      "use"      => @controls[5]
     }
 
     #says if it should calculate a lerp or not
@@ -75,6 +77,9 @@ class Ship
 
     #this displays the points for the ship in the bottom left
     @pointModel = Text.new(@points.to_s, x: 0, y: Window.height-20, z:255, size:20)
+
+    @revive = Text.new('', x: 0, y: 0, z: 255, size: 32)
+    @revive.remove
   end
 
   #this is called when the user presses a direction key, it is used to keep track of the current and old directions for lerping
@@ -97,9 +102,23 @@ class Ship
           z: 200
         ))
       end
+    else
+      @points += 10
     end
   end
 
+  def minusHealth(minus)
+    minus.times do
+      @health-=1
+      if @health >= 0
+        @healthModels[@health].remove
+        @healthModels.delete(@healthModels[@health])
+      end
+      if @health <= 0
+        self.kill
+      end
+    end
+  end
 
   #This gets called every frame by the ships update method
   #It first checks if the ship is in a valid position to move
@@ -107,19 +126,19 @@ class Ship
   def move()
   if @lerps == 0
     if @model.x >= Window.width-@size
-      @vel = Pos.new(-@speed,0)
+      @vel = Pos.new(-@vel.x,-@vel.y)
       self.changeDir(180)
     end
     if @model.x <= 0
-      @vel = Pos.new(@speed,0)
+      @vel = Pos.new(-@vel.x,-@vel.y)
       self.changeDir(0)
     end
     if @model.y >= Window.height-@size
-      @vel = Pos.new(0,-@speed)
+      @vel = Pos.new(-@vel.x,-@vel.y)
       self.changeDir(270)
     end
     if @model.y <= 0
-      @vel = Pos.new(0,@speed)
+      @vel = Pos.new(-@vel.x,-@vel.y)
       self.changeDir(90)
     end
   end
@@ -183,8 +202,6 @@ class Ship
         @shotCount *=3
         @model.color = tint
         @powerUpTimer = 12
-      else
-        puts 'Undefinded Powerup : ' + type
       end
     end
   end
@@ -206,7 +223,6 @@ class Ship
       )
         #if it detects it is in an asteroid it removes one health and resets everything
         @health-=1
-        @pos = Pos.new(Window.width/2,Window.height/2)
         @model.color = [1,1,1,1]
         @healthModels[@health].remove
         @healthModels.delete(@healthModels[@health])
@@ -217,7 +233,7 @@ class Ship
         $crash.play
         if @health >=1
           #if it still has lives left
-
+          @pos = Pos.new(Window.width/2,Window.height/2)
         else
           #if it has no more lives
           self.kill()
@@ -226,11 +242,68 @@ class Ship
     end
   end
 
+  def reviveLabelCheck()
+    if @health >= 2
+      @revive.remove
+      $ships.each do |i|
+        if i != self
+          if i.isDead == true
+            if (@pos.x-@size*2..@pos.x+@size*2).include?(i.pos.x) && (@pos.y-@size*2..@pos.y+@size*2).include?(i.pos.y)
+              @revive.remove
+              @revive = Text.new('Revive ship?', x: i.pos.x, y: i.pos.y+@size, z: 255, size: 20)
+              @revive.add
+            end
+          end
+        end
+      end
+    end
+  end
+
+  def use()
+    if @health >= 2
+      $ships.each do |i|
+        if i != self
+          if i.isDead == true
+            if (@pos.x-@size*2..@pos.x+@size*2).include?(i.pos.x) && (@pos.y-@size*2..@pos.y+@size*2).include?(i.pos.y)
+              @revive.remove
+              i.revive()
+              @points += 50
+              self.minusHealth(2)
+              break
+            end
+          end
+        end
+      end
+    end
+  end
+
+  def revive()
+    self.addHealth(1)
+    @isDead = false
+    @pos = Pos.new(Window.width/2,Window.height/2)
+    @vel = Pos.new(0,0)
+  end
+
   #this gets called when the ship has no more lives
   def kill()
-    gameOver = Text.new('GAME OVER', x: Window.width/2-100, y: Window.height/2, z: 255, size: 32)
-    gameOver.add
-    $stop = true
+    @isDead = true
+
+    if self.otherShipAlive() == true
+      @vel = Pos.new(rand(-0.35..0.35),rand(-0.35..0.35))
+    else
+      gameOver = Text.new('GAME OVER', x: Window.width/2-100, y: Window.height/2, z: 255, size: 32)
+      gameOver.add
+      $stop = true
+    end
+  end
+
+  def otherShipAlive()
+    $ships.each do |i|
+      if i.isDead == false
+        return true
+      end
+    end
+    return false
   end
 
   def powerUpCheck()
@@ -279,10 +352,15 @@ class Ship
   #this gets called every frame by the windows update method
   #it calls the ships move method and then updates the models position to match the new decided position
   def update()
-    self.powerUpCheck()
-    self.collideCheck()
-    self.move()
+    
+    if @isDead == false
+      self.powerUpCheck()
+      self.collideCheck()
+      self.reviveLabelCheck()
+    end
+
     self.rotationLerp()
+    self.move()
 
     @pointModel.remove
     @pointModel = Text.new('Player ' + (@shipID + 1).to_s + ' Points:' + @points.to_s, x: 0, y: Window.height-(20 * (@shipID+1)), z:255, size:20)

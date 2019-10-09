@@ -26,8 +26,9 @@ $wave = 0
 $waveUI = Text.new("")
 
 $setup = [
-  ["w","a","s","d","e"],
- #["i","j","k","l","p"]
+  ["w","a","s","d","e","r"],
+  ["i","j","k","l","o","p"],
+  ["up","left","down","right","/","."],
 ]
 
 #adds the ships
@@ -37,8 +38,8 @@ end
 
 #this is a ruby2d event that is called every time a key is pushed down. it gets passed the key that was pushed in the event var
 on :key_down do |event|
-  $ships.each do |i|       #this goes through all the ships so they are all controlled at once
-    if i.lerps == 0        #if the current ship isnt animating then check for key input
+  $ships.each do |i|      #this goes through all the ships so they are all controlled at once
+    if i.lerps == 0 && i.isDead == false       #if the current ship isnt animating then check for key input
       case event.key
       when i.Control["forward"]
         i.vel = Pos.new(0,-i.speed)
@@ -54,6 +55,8 @@ on :key_down do |event|
         i.changeDir(0)
       when i.Control["shoot"]
         i.shoot()
+      when i.Control["use"]
+        i.use()
       end
     end
   end
