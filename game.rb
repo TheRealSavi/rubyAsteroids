@@ -74,7 +74,7 @@ def waveContoller()
     $waveUI.add
 
     Thread.new {
-      ($wave*2).times do |i|
+      ($wave*2+5).times do |i|
         $waveUI.color = '#a4fc56'
         $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
         sleep(0.2)

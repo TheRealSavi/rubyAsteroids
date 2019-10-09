@@ -167,6 +167,7 @@ class Ship
     end
     @shotCount = @dShotCount
     @pointAdd = @dPointAdd
+    @pierce = false
     @model.color = [1,1,1,1]
   end
 
@@ -197,7 +198,7 @@ class Ship
         self.clearPowerUps()
         @pierce = true
         @model.color = tint
-        @powerUpTimer = 4
+        @powerUpTimer = 6
       end
     end
   end
