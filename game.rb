@@ -21,8 +21,10 @@ $lifeUp    = Sound.new('sounds/1up.mp3')
 #initializes global variables
 $asteroids = []
 $ships = []
+
 $stop = false
 $wave = 0
+
 $waveUI = Text.new("")
 
 $setup = [
@@ -62,26 +64,30 @@ on :key_down do |event|
   end
 end
 
+def waveContoller()
+  if $asteroids.length <= 0
+    $wave += 1
+
+    $waveUI.remove
+    $waveUI = Text.new($wave.to_s, x: Window.width-($wave.to_s.length * 80), y: Window.height-80, z:255, size:80, color: '#fc5656')
+    $waveUI.add
+
+    Thread.new {
+      ($wave*2).times do |i|
+        $waveUI.color = '#a4fc56'
+        $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
+        sleep(0.2)
+        $waveUI.color = '#fc5656'
+      end
+    }
+  end
+end
+
 #this is a ruby2d event that is called every frame
 update do
   if !$stop
 
-    if $asteroids.length <= 0
-      $wave += 1
-
-      $waveUI.remove
-      $waveUI = Text.new($wave.to_s, x: Window.width-($wave.to_s.length * 80), y: Window.height-80, z:255, size:80, color: '#fc5656')
-      $waveUI.add
-
-      Thread.new {
-        ($wave*2).times do |i|
-          $waveUI.color = '#a4fc56'
-          $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
-          sleep(0.2)
-          $waveUI.color = '#fc5656'
-        end
-      }
-    end
+    waveContoller()
 
     for i in $asteroids
       i.update()           #this calls all the asteroids update functions

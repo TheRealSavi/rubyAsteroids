@@ -1,20 +1,13 @@
 class Ship
   #This allows read and write access to these variables when called outside of the class
-  attr_accessor :pos, :model, :dir, :vel, :bullets, :speed, :size, :lerp, :lerps, :lastDir, :points, :controls, :Control, :pointAdd, :isDead
+  attr_accessor :pos, :model, :dir, :vel, :bullets, :speed, :size, :lerp, :lerps, :lastDir, :points, :Control, :pointAdd, :isDead
 
   def initialize(health, pos, controls, shipID)
-    @health = health
-    @isDead = false
-    @pos = pos
-    @vel = Pos.new(0,0)
-    @size = 32
-    @points = 0
-    @pointAdd = 1
-    @dPointAdd = @pointAdd
+    @health = health #ships health
+    @pos = pos #ships position has a position object
+    @shipID = shipID #ships id 0 based
+    @controls = controls #an array of the ships desired controls
 
-    @shipID = shipID
-
-    @controls = controls
     @Control = {
       "forward"  => @controls[0],
       "left"     => @controls[1],
@@ -24,31 +17,30 @@ class Ship
       "use"      => @controls[5]
     }
 
-    #says if it should calculate a lerp or not
-    @lerp = false
-    #this holds how many frames the ship has lerped for so it knows when to stop rotating
-    @lerps = 0
+    @vel = Pos.new(0,0) #default ship velocity
+    @size = 32 #ship model size
+    @points = 0 #defualt points
+    @pointAdd = 1 #default ammount of points to add for hitting an asteroid
+    @isDead = false #says if ship is dead or not
+    @lerp = false #says if it should calculate a lerp or not
+    @lerps = 0 #this holds how many frames the ship has lerped for so it knows when to stop rotating
+    @lastDir = 0 #this holds the last direction the ship was moving so it knows what angle to lerp from
+    @dir = 270 #this holds the ships new direction so it knows where to lerp to
+    @shotCount = 1 #this is how many bullets are made when the shoot key is pressed
+    @speed = 2 #this is how many pixels it moves per frame
+    @powerUpTimer = 0 #how much longer the ship has on its powerup
+    @tick = 0 #used for determining powerUpTimer
 
-    #this holds the last direction the ship was moving so it knows what angle to lerp from
-    @lastDir = 0
-    #this holds the ships new direction so it knows where to lerp to
-    @dir = 270
+    @bullets = [] #This is the ships array of bullets that holds all the bullet objects this ship creates
 
-    #this is how many bullets are made when the shoot key is pressed
-    #d versions of variables hold the defualt version of the var so it can be reverted to later
-    @shotCount = 1
-    @dShotCount = @shotCount
-
-    #this is how many pixels it moves per frame
-    @speed = 2
-    @dSpeed = @speed
-
-    #these are for deciding when powerups shold end
-    @powerUpTimer = 0
-    @tick = 0
-
-    #This is the ships array of bullets that holds all the bullet objects this ship creates
-    @bullets = []
+    #This is the ships model object so that there is something to actually display
+    @model = Image.new(
+      'imgs/ship.png',
+      x: @pos.x, y: @pos.y,
+      width: @size, height: @size,
+      rotate: 270,
+      z: 200
+    )
 
     #this is how the ship displays how many lives it has in the top left
     @healthModels = []
@@ -62,24 +54,20 @@ class Ship
       ))
     end
 
-    #This is the ships model object so that there is something to actually display
-    @model = Image.new(
-      'imgs/ship.png',
-      x: @pos.x, y: @pos.y,
-      width: @size, height: @size,
-      rotate: 270,
-      z: 200
-    )
-
     #this is the number that appears to show when a powerup will end
-    @id = Text.new(@powerUpTimer.to_s, x: @pos.x, y: @pos.y, z:202)
+    @id = Text.new('', x: 0, y: 0, z:0, size:0)
     @id.remove
-
     #this displays the points for the ship in the bottom left
-    @pointModel = Text.new(@points.to_s, x: 0, y: Window.height-20, z:255, size:20)
-
-    @revive = Text.new('', x: 0, y: 0, z: 255, size: 32)
+    @pointModel = Text.new('', x: 0, y: 0, z:0, size:0)
+    @pointModel.remove
+    #this is the text that asks if you want to revive a dead ship
+    @revive = Text.new('', x:0, y:0, z:0, size:0)
     @revive.remove
+
+    #d versions of variables hold the defualt version of the var so it can be reverted to later
+    @dPointAdd  = @pointAdd
+    @dSpeed     = @speed
+    @dShotCount = @shotCount
   end
 
   #this is called when the user presses a direction key, it is used to keep track of the current and old directions for lerping
@@ -107,6 +95,7 @@ class Ship
     end
   end
 
+  #this is called when a life should be removed from the ship it is used to remove health models and kill ship
   def minusHealth(minus)
     minus.times do
       @health-=1
@@ -124,24 +113,24 @@ class Ship
   #It first checks if the ship is in a valid position to move
   #if its not if turns it around otherwise it just goes
   def move()
-  if @lerps == 0
-    if @model.x >= Window.width-@size
-      @vel = Pos.new(-@vel.x,-@vel.y)
-      self.changeDir(180)
+    if @lerps == 0
+      if @model.x >= Window.width-@size
+        @vel = Pos.new(-@vel.x,-@vel.y)
+        self.changeDir(180)
+      end
+      if @model.x <= 0
+        @vel = Pos.new(-@vel.x,-@vel.y)
+        self.changeDir(0)
+      end
+      if @model.y >= Window.height-@size
+        @vel = Pos.new(-@vel.x,-@vel.y)
+        self.changeDir(270)
+      end
+      if @model.y <= 0
+        @vel = Pos.new(-@vel.x,-@vel.y)
+        self.changeDir(90)
+      end
     end
-    if @model.x <= 0
-      @vel = Pos.new(-@vel.x,-@vel.y)
-      self.changeDir(0)
-    end
-    if @model.y >= Window.height-@size
-      @vel = Pos.new(-@vel.x,-@vel.y)
-      self.changeDir(270)
-    end
-    if @model.y <= 0
-      @vel = Pos.new(-@vel.x,-@vel.y)
-      self.changeDir(90)
-    end
-  end
 
     #this moves the ship by its velocity
     @pos.x += @vel.x
@@ -350,9 +339,8 @@ class Ship
   end
 
   #this gets called every frame by the windows update method
-  #it calls the ships move method and then updates the models position to match the new decided position
   def update()
-    
+
     if @isDead == false
       self.powerUpCheck()
       self.collideCheck()
