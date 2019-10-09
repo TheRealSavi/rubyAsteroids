@@ -36,3 +36,27 @@ class CircleLerp
 
   end
 end
+
+class Intersect
+  def initialize(obj1, obj2)
+    @obj1 = obj1
+    @obj2 = obj2
+  end
+
+  def calculate
+    if (
+    @obj1[0] >= @obj2[0] &&
+    @obj1[0] <= @obj2[0] + @obj2[2] &&
+    @obj1[1] >= @obj2[1] &&
+    @obj1[1] <= @obj2[1] + @obj2[2] ||
+    @obj1[0] + @obj1[2] >= @obj2[0] &&
+    @obj1[0] + @obj1[2] <= @obj2[0] + @obj2[2] &&
+    @obj1[1] + @obj1[2] >= @obj2[1] &&
+    @obj1[1] + @obj1[2] <= @obj2[1] + @obj2[2]
+    )
+      return true
+    else
+      return false
+    end
+  end
+end
