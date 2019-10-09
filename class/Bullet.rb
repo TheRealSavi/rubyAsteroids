@@ -37,22 +37,15 @@ class Bullet
   def hit()
     #first it runs through all the asteroids and checks if itself is inside one
     for k in $asteroids
-      if (
-      @model.x >= k.pos.x &&
-      @model.x <= k.pos.x + k.size &&
-      @model.y >= k.pos.y &&
-      @model.y <= k.pos.y + k.size ||
-      @model.x + @size >= k.pos.x &&
-      @model.x + @size <= k.pos.x + k.size &&
-      @model.y + @size >= k.pos.y &&
-      @model.y + @size <= k.pos.y + k.size
-      )
+      if Intersect.new([@model.x,@model.y,@size],[k.pos.x,k.pos.y,k.size]).calculate()
         #if it detects it is in an asteroid it calls that asteroids split function and then kills itself
         #it sends the ship that shot it its powerup value and tint so the ship can interpret it
         @ship.powerUp(k.type,k.tint[k.type])
         k.split()
         @ship.points += @ship.pointAdd
-        self.kill()
+        if @ship.pierce == false
+          self.kill()
+        end
       end
     end
   end

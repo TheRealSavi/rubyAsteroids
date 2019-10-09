@@ -1,6 +1,6 @@
 class Ship
   #This allows read and write access to these variables when called outside of the class
-  attr_accessor :pos, :model, :dir, :vel, :bullets, :speed, :size, :lerp, :lerps, :lastDir, :points, :Control, :pointAdd, :isDead
+  attr_accessor :pos, :model, :dir, :vel, :bullets, :speed, :size, :lerp, :lerps, :lastDir, :points, :Control, :pointAdd, :isDead, :pierce
 
   def initialize(health, pos, controls, shipID)
     @health = health #ships health
@@ -30,6 +30,7 @@ class Ship
     @speed = 2 #this is how many pixels it moves per frame
     @powerUpTimer = 0 #how much longer the ship has on its powerup
     @tick = 0 #used for determining powerUpTimer
+    @pierce = false #contols the shooting mode for the bullets
 
     @bullets = [] #This is the ships array of bullets that holds all the bullet objects this ship creates
 
@@ -176,10 +177,10 @@ class Ship
       when 'Speed'
         $speedUp.play
         self.clearPowerUps()
-        @speed *= 3
+        @speed *= 2.5
         @pointAdd *=3
-        @vel.x *= 3
-        @vel.y *= 3
+        @vel.x *= 2.5
+        @vel.y *= 2.5
         @model.color = tint
         @powerUpTimer = 7
       when '1Up'
@@ -191,6 +192,12 @@ class Ship
         @shotCount *=3
         @model.color = tint
         @powerUpTimer = 12
+      when 'Pierce'
+        $lifeUp.play
+        self.clearPowerUps()
+        @pierce = true
+        @model.color = tint
+        @powerUpTimer = 4
       end
     end
   end
@@ -200,16 +207,7 @@ class Ship
   def collideCheck()
     #first it runs through all the asteroids and checks if itself is inside one
     for k in $asteroids
-      if (
-      @model.x >= k.pos.x &&
-      @model.x <= k.pos.x + k.size &&
-      @model.y >= k.pos.y &&
-      @model.y <= k.pos.y + k.size ||
-      @model.x + @size >= k.pos.x &&
-      @model.x + @size <= k.pos.x + k.size &&
-      @model.y + @size >= k.pos.y &&
-      @model.y + @size <= k.pos.y + k.size
-      )
+      if Intersect.new([@model.x,@model.y,@size],[k.pos.x,k.pos.y,k.size]).calculate()
         #if it detects it is in an asteroid it removes one health and resets everything
         @health-=1
         @model.color = [1,1,1,1]

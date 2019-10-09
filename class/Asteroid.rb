@@ -8,11 +8,12 @@ class Asteroid
     @vel = Pos.new(rand(-0.35..0.35),rand(-0.35..0.35))
 
     #this defines the powerups the asteroid could get and those powerups colors
-    @types = ['Triple','Speed','1Up']
+    @types = ['Triple','Speed','1Up','Pierce']
     @tint = {
       'Triple' => [0.98, 0.93, 0.30, 1], #these are RGBA values
       'Speed'  => [0.98, 0.36, 0.30, 1],
       '1Up'    => [0.30, 0.98, 0.49, 1],
+      'Pierce' => [0.75, 0.30, 0.80, 1],
       'None'   => [1.00, 1.00, 1.00, 1]
     }
 

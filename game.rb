@@ -10,13 +10,14 @@ require_relative 'class/Ship.rb'
 require_relative 'class/Com.rb'
 
 #imports sounds
-$downgrade = Sound.new('sounds/downgrade.mp3')
-$speedUp   = Sound.new('sounds/speedUp.mp3')
-$triple    = Sound.new('sounds/triple.mp3')
-$crash     = Sound.new('sounds/crash.mp3')
-$boom      = Sound.new('sounds/boom.mp3')
-$pew       = Sound.new('sounds/pew.mp3')
-$lifeUp    = Sound.new('sounds/1up.mp3')
+$downgrade = Music.new('sounds/downgrade.mp3')
+$speedUp   = Music.new('sounds/speedUp.mp3')
+$triple    = Music.new('sounds/triple.mp3')
+$crash     = Music.new('sounds/crash.mp3')
+$boom      = Music.new('sounds/boom.mp3')
+$pew       = Music.new('sounds/pew.mp3')
+$lifeUp    = Music.new('sounds/1up.mp3')
+Music.volume = 10
 
 #initializes global variables
 $asteroids = []
