@@ -20,7 +20,7 @@ class CircleLerp
   end
 
   def calculate()
-    delta = @stop - @start
+    delta = @stop.to_f - @start.to_f
 
     if 360-delta.abs < delta.abs
       if 360-delta > 360

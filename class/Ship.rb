@@ -24,7 +24,7 @@ class Ship
     @isDead = false #says if ship is dead or not
     @lerp = false #says if it should calculate a lerp or not
     @lerps = 0 #this holds how many frames the ship has lerped for so it knows when to stop rotating
-    @lastDir = 0 #this holds the last direction the ship was moving so it knows what angle to lerp from
+    @lastDir = 270 #this holds the last direction the ship was moving so it knows what angle to lerp from
     @dir = 270 #this holds the ships new direction so it knows where to lerp to
     @shotCount = 1 #this is how many bullets are made when the shoot key is pressed
     @speed = 2 #this is how many pixels it moves per frame
@@ -56,14 +56,14 @@ class Ship
     end
 
     #this is the number that appears to show when a powerup will end
-    @id = Text.new('', x: 0, y: 0, z:0, size:0)
-    @id.remove
+    @timerLabel = Text.new('', x: 0, y: 0, z:0, size:0)
+    @timerLabel.remove
     #this displays the points for the ship in the bottom left
-    @pointModel = Text.new('', x: 0, y: 0, z:0, size:0)
-    @pointModel.remove
+    @pointLabel = Text.new('', x: 0, y: 0, z:0, size:0)
+    @pointLabel.remove
     #this is the text that asks if you want to revive a dead ship
-    @revive = Text.new('', x:0, y:0, z:0, size:0)
-    @revive.remove
+    @reviveLabel = Text.new('', x:0, y:0, z:0, size:0)
+    @reviveLabel.remove
 
     #d versions of variables hold the defualt version of the var so it can be reverted to later
     @dPointAdd  = @pointAdd
@@ -73,7 +73,6 @@ class Ship
 
   #this is called when the user presses a direction key, it is used to keep track of the current and old directions for lerping
   def changeDir(newDir)
-    @lastDir = @dir
     @dir = newDir
     @lerp = true
   end
@@ -100,7 +99,7 @@ class Ship
   def minusHealth(minus)
     minus.times do
       @health-=1
-      if @health >= 0
+      if @health >= 0 && @healthModels.length >= 1
         @healthModels[@health].remove
         @healthModels.delete(@healthModels[@health])
       end
@@ -143,17 +142,24 @@ class Ship
 
   #this gets called if the user presses the shoot key
   def shoot()
+    Thread.new {
     #this adda a new bullet object to the ships bullet array with the same position and velocity of the ship
     $pew.play
     for i in 1..@shotCount
       @bullets.push(Bullet.new(Pos.new(@pos.x + (i-1)*16,@pos.y + (i-1)*16),Pos.new(@vel.x,@vel.y),@bullets,@size/2, self))
     end
+  }
   end
 
   #this is called whenever the ships powerup informarion needs to be reset
   #it reverts to default speed and shotcount, re evaluates current velocity, and returns to standard color
   def clearPowerUps()
+    @shotCount = @dShotCount
+    @pointAdd = @dPointAdd
     @speed = @dSpeed
+    @pierce = false
+    @timerLabel.remove
+
     if @vel.x == 0
       if @vel.y <= 0
         @vel.y = -@speed
@@ -165,9 +171,8 @@ class Ship
     else
       @vel.x = @speed
     end
-    @shotCount = @dShotCount
-    @pointAdd = @dPointAdd
-    @pierce = false
+
+    @powerUpTimer = 0
     @model.color = [1,1,1,1]
   end
 
@@ -175,24 +180,28 @@ class Ship
   def powerUp(type, tint)
     if type != 'None'
       case type
+
       when 'Speed'
         $speedUp.play
         self.clearPowerUps()
-        @speed *= 2.5
+        @speed *= 2
         @pointAdd *=3
-        @vel.x *= 2.5
-        @vel.y *= 2.5
+        @vel.x *= 2
+        @vel.y *= 2
         @model.color = tint
         @powerUpTimer = 7
+
       when '1Up'
         $lifeUp.play
         self.addHealth(1)
+
       when 'Triple'
         $triple.play
         self.clearPowerUps()
         @shotCount *=3
         @model.color = tint
         @powerUpTimer = 12
+
       when 'Pierce'
         $lifeUp.play
         self.clearPowerUps()
@@ -203,43 +212,49 @@ class Ship
     end
   end
 
-  #this checks if the ship has colided with an asteroid
-  #it gets called everyframe by the ships update method
+  #this checks if the ship has colided with anything
+  #it gets called every frame by the ships update method
   def collideCheck()
-    #first it runs through all the asteroids and checks if itself is inside one
-    for k in $asteroids
+
+    for k in $asteroids #first it runs through all the asteroids and checks if itself is inside one
       if Intersect.new([@model.x,@model.y,@size],[k.pos.x,k.pos.y,k.size]).calculate()
-        #if it detects it is in an asteroid it removes one health and resets everything
-        @health-=1
-        @model.color = [1,1,1,1]
-        @healthModels[@health].remove
-        @healthModels.delete(@healthModels[@health])
-        self.clearPowerUps()
-        @powerUpTimer = 0
-        @id.remove
-        @vel = Pos.new(0,0)
-        $crash.play
-        if @health >=1
-          #if it still has lives left
-          @pos = Pos.new(Window.width/2,Window.height/2)
-        else
-          #if it has no more lives
-          self.kill()
-        end
+        self.hurt() #if it detects it has hit an asteroid the ship gets hurt
       end
     end
+
+    for k in $ships
+      if Intersect.new([@model.x,@model.y,@size],[k.pos.x,k.pos.y,k.size]).calculate()
+
+      end
+    end
+
+  end
+
+  def hurt()
+    self.minusHealth(1)
+    self.clearPowerUps()
+    $crash.play
+
+    @vel = Pos.new(0,0)
+
+    if @health >=1 #if it still has lives left
+      @pos = Pos.new(Window.width/2,Window.height/2)
+    else
+      self.kill() #if it has no more lives
+    end
+
   end
 
   def reviveLabelCheck()
     if @health >= 2
-      @revive.remove
+      @reviveLabel.remove
       $ships.each do |i|
         if i != self
           if i.isDead == true
             if (@pos.x-@size*2..@pos.x+@size*2).include?(i.pos.x) && (@pos.y-@size*2..@pos.y+@size*2).include?(i.pos.y)
-              @revive.remove
-              @revive = Text.new('Revive ship?', x: i.pos.x, y: i.pos.y+@size, z: 255, size: 20)
-              @revive.add
+              @reviveLabel.remove
+              @reviveLabel = Text.new('Revive ship?', x: i.pos.x, y: i.pos.y+@size, z: 255, size: 20)
+              @reviveLabel.add
             end
           end
         end
@@ -253,7 +268,7 @@ class Ship
         if i != self
           if i.isDead == true
             if (@pos.x-@size*2..@pos.x+@size*2).include?(i.pos.x) && (@pos.y-@size*2..@pos.y+@size*2).include?(i.pos.y)
-              @revive.remove
+              @reviveLabel.remove
               i.revive()
               @points += 50
               self.minusHealth(2)
@@ -298,9 +313,9 @@ class Ship
     #this checks if there is a powerup active
     if @powerUpTimer >= 1
       #this updates the text to the seconds left on the powerup
-      @id.remove
-      @id = Text.new(@powerUpTimer.to_s, x: @pos.x-10, y: @pos.y-10, z:202, size:12)
-      @id.add
+      @timerLabel.remove
+      @timerLabel = Text.new(@powerUpTimer.to_s, x: @pos.x-10, y: @pos.y-10, z:202, size:12)
+      @timerLabel.add
 
       #this checks if it has been a second (60 frames)
       @tick += 1
@@ -310,7 +325,7 @@ class Ship
           #this removes the powerup if there is no time left
           $downgrade.play
           self.clearPowerUps()
-          @id.remove
+          @timerLabel.remove
         end
       end
     end
@@ -319,8 +334,7 @@ class Ship
   #this gets called every frame by the ships update method
   #it manages the animation of the rotation of the ship
   def rotationLerp()
-    #how many frames it will take to complete the rotation (must be a factor of 90)
-    # aka one of these 1,2,3,5,6,9,10,15,18,30,45,90
+    #how many frames it will take to complete the rotation
     steps = 6
     step = CircleLerp.new(@lastDir,@dir,steps).calculate() #returns how many degrees to turn per frame given steps
 
@@ -331,7 +345,7 @@ class Ship
       if @lerps >= steps  #if its done lerping because it hit the said steps
         @lerps = 0        #reset
         @lerp = false     #finish lerping
-        @lastDir = @dir   #finalize direction
+        @lastDir = @dir   #finalize rotation
       end
 
     end
@@ -349,8 +363,8 @@ class Ship
     self.rotationLerp()
     self.move()
 
-    @pointModel.remove
-    @pointModel = Text.new('Player ' + (@shipID + 1).to_s + ' Points:' + @points.to_s, x: 0, y: Window.height-(20 * (@shipID+1)), z:255, size:20)
-    @pointModel.add
+    @pointLabel.remove
+    @pointLabel = Text.new('Player ' + (@shipID + 1).to_s + ' Points:' + @points.to_s, x: 0, y: Window.height-(20 * (@shipID+1)), z:255, size:20)
+    @pointLabel.add
   end
 end

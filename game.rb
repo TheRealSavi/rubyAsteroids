@@ -1,7 +1,7 @@
 require 'ruby2d'
 
 set width: 1680, height:1050
-set title: "Asteroids", fullscreen:true, background: '#061c2b'
+set title: "Asteroids", fullscreen:true, background: '#020f18'
 
 #imports classes
 require_relative 'class/Asteroid.rb'
@@ -10,14 +10,14 @@ require_relative 'class/Ship.rb'
 require_relative 'class/Com.rb'
 
 #imports sounds
-$downgrade = Music.new('sounds/downgrade.mp3')
-$speedUp   = Music.new('sounds/speedUp.mp3')
-$triple    = Music.new('sounds/triple.mp3')
-$crash     = Music.new('sounds/crash.mp3')
-$boom      = Music.new('sounds/boom.mp3')
-$pew       = Music.new('sounds/pew.mp3')
-$lifeUp    = Music.new('sounds/1up.mp3')
-Music.volume = 10
+$downgrade = Sound.new('sounds/downgrade.mp3')
+$speedUp   = Sound.new('sounds/speedUp.mp3')
+$triple    = Sound.new('sounds/triple.mp3')
+$crash     = Sound.new('sounds/crash.mp3')
+$boom      = Sound.new('sounds/boom.mp3')
+$pew       = Sound.new('sounds/pew.mp3')
+$lifeUp    = Sound.new('sounds/1up.mp3')
+
 
 #initializes global variables
 $asteroids = []
@@ -31,7 +31,6 @@ $waveUI = Text.new("")
 $setup = [
   ["w","a","s","d","e","r"],
   ["i","j","k","l","o","p"],
-  ["up","left","down","right","/","."],
 ]
 
 #adds the ships
