@@ -1,9 +1,10 @@
 require 'ruby2d'
 
-set width: 1680, height:1050
-set title: "Asteroids", fullscreen:true, background: '#020f18'
+set width: 650, height: 650
+set title: "Asteroids", fullscreen:false, background: '#020f18'
 
 #imports classes
+require_relative 'savio/savio.rb'
 require_relative 'class/Asteroid.rb'
 require_relative 'class/Bullet.rb'
 require_relative 'class/Ship.rb'
