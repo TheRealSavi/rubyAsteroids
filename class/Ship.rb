@@ -1,6 +1,6 @@
 class Ship
   #This allows read and write access to these variables when called outside of the class
-  attr_accessor :pos, :model, :dir, :vel, :bullets, :speed, :size, :lerp, :lerps, :lastDir, :points, :Control, :pointAdd, :isDead, :pierce
+  attr_accessor :pos, :model, :dir, :vel, :bullets, :speed, :size, :lerp, :lerps, :lastDir, :points, :Control, :pointAdd, :isDead, :pierce, :immune
 
   def initialize(health, pos, controls, shipID)
     @health = health #ships health
@@ -31,6 +31,7 @@ class Ship
     @powerUpTimer = 0 #how much longer the ship has on its powerup
     @tick = 0 #used for determining powerUpTimer
     @pierce = false #contols the shooting mode for the bullets
+    @immune = false #controls whether the ship is immune to damage or not
 
     @bullets = [] #This is the ships array of bullets that holds all the bullet objects this ship creates
 
@@ -142,13 +143,11 @@ class Ship
 
   #this gets called if the user presses the shoot key
   def shoot()
-    Thread.new {
     #this adda a new bullet object to the ships bullet array with the same position and velocity of the ship
     $pew.play
     for i in 1..@shotCount
       @bullets.push(Bullet.new(Pos.new(@pos.x + (i-1)*16,@pos.y + (i-1)*16),Pos.new(@vel.x,@vel.y),@bullets,@size/2, self))
     end
-  }
   end
 
   #this is called whenever the ships powerup informarion needs to be reset
@@ -158,17 +157,22 @@ class Ship
     @pointAdd = @dPointAdd
     @speed = @dSpeed
     @pierce = false
+    @immune = false
     @timerLabel.remove
 
-    if @vel.x == 0
-      if @vel.y <= 0
-        @vel.y = -@speed
-      else
-        @vel.y = @speed
-      end
-    elsif @vel.x <= 0
+    if @vel.y < 0
+      @vel.y = -@speed
+    end
+
+    if @vel.y > 0
+      @vel.y = @speed
+    end
+
+    if @vel.x < 0
       @vel.x = -@speed
-    else
+    end
+
+    if @vel.x > 0
       @vel.x = @speed
     end
 
@@ -177,7 +181,7 @@ class Ship
   end
 
   #this is called by the bullet object when it detects it has hit an asteroid
-  def powerUp(type, tint)
+  def powerUp(type, tint, time = nil)
     if type != 'None'
       case type
 
@@ -189,7 +193,11 @@ class Ship
         @vel.x *= 2
         @vel.y *= 2
         @model.color = tint
-        @powerUpTimer = 7
+        if time != nil
+          @powerUpTimer = time
+        else
+          @powerUpTimer = 7
+        end
 
       when '1Up'
         $lifeUp.play
@@ -200,14 +208,33 @@ class Ship
         self.clearPowerUps()
         @shotCount *=3
         @model.color = tint
-        @powerUpTimer = 12
+        if time != nil
+          @powerUpTimer = time
+        else
+          @powerUpTimer = 12
+        end
 
       when 'Pierce'
         $lifeUp.play
         self.clearPowerUps()
         @pierce = true
         @model.color = tint
-        @powerUpTimer = 6
+        if time != nil
+          @powerUpTimer = time
+        else
+          @powerUpTimer = 6
+        end
+
+      when 'Immune'
+        $lifeUp.play
+        self.clearPowerUps()
+        @immune = true
+        @model.color = tint
+        if time != nil
+          @powerUpTimer = time
+        else
+          @powerUpTimer = 4
+        end
       end
     end
   end
@@ -231,18 +258,19 @@ class Ship
   end
 
   def hurt()
-    self.minusHealth(1)
-    self.clearPowerUps()
-    $crash.play
+    if @immune == false
+      self.minusHealth(1)
+      self.clearPowerUps()
+      $crash.play
 
-    @vel = Pos.new(0,0)
-
-    if @health >=1 #if it still has lives left
-      @pos = Pos.new(Window.width/2,Window.height/2)
-    else
-      self.kill() #if it has no more lives
+      if @health >=1 #if it still has lives left
+        @pos = Pos.new(Window.width/2,Window.height/2)
+        powerUp('Immune',[0.36, 0.90, 0.71, 1], 1)
+        @vel = Pos.new(0,0)
+      else
+        self.kill() #if it has no more lives
+      end
     end
-
   end
 
   def reviveLabelCheck()
@@ -281,6 +309,7 @@ class Ship
   end
 
   def revive()
+    powerUp('Immune',[0.36, 0.90, 0.71, 1], 1)
     self.addHealth(1)
     @isDead = false
     @pos = Pos.new(Window.width/2,Window.height/2)

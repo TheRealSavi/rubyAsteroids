@@ -1,7 +1,7 @@
 require 'ruby2d'
 
-set width: 650, height: 650
-set title: "Asteroids", fullscreen:false, background: '#020f18'
+set width: 1028, height: 1028
+set title: "Asteroids", fullscreen:true, background: '#020f18'
 
 #imports classes
 require_relative 'savio/savio.rb'
@@ -19,25 +19,50 @@ $boom      = Sound.new('sounds/boom.mp3')
 $pew       = Sound.new('sounds/pew.mp3')
 $lifeUp    = Sound.new('sounds/1up.mp3')
 
+def startGame()
+  #initializes global variables
+  $asteroids = []
+  $ships = []
 
-#initializes global variables
-$asteroids = []
-$ships = []
+  $stop = true
+  $wave = 0
 
-$stop = false
-$wave = 0
+  $waveUI = Text.new("")
 
-$waveUI = Text.new("")
+  $setup = [
+    ["w","a","s","d","e","r"],
+    ["i","j","k","l","o","p"],
+  ]
 
-$setup = [
-  ["w","a","s","d","e","r"],
-  ["i","j","k","l","o","p"],
-]
+  $uiBackground = Square.new(x:0,y:0,size:Window.width,color:'black',z:999)
+  $uiSplash = Text.new("RUBY ASTEROIDS!",x:0, z:1000, size:Window.width/9)
+  $uiShipCountConfirmButton = Button.new(displayName: 'Confirm', x:(Window.width/2), y:(Window.height/2)+30,size:10,z:1000,type:'clicker')
+  $uiStartWaveSlider = Slider.new(displayName: 'Start on Wave', x:(Window.width/2)-150, y:(Window.height/2)-130,size:15,length:300,z:1000, min:1,max:50)
+  $uiShipCountSlider = Slider.new(displayName: 'Ship Count', x:(Window.width/2)-150, y:(Window.height/2)-30,size:15,length:300,z:1000, min:1,max:$setup.count)
 
-#adds the ships
-$setup.count.times do |i|
-  $ships.push(Ship.new(3, Pos.new(Window.width/2,Window.height/2),$setup[i],i))
+  $uiShipCountConfirmButton.onClick do
+    $shipCount = $uiShipCountSlider.value.to_i
+    $wave = $uiStartWaveSlider.value.to_i - 1
+    if $shipCount <= 0
+      $shipCount = 1
+    end
+    $uiSplash.remove
+    $uiBackground.remove
+    $uiShipCountSlider.remove
+    $uiStartWaveSlider.remove
+    $uiShipCountConfirmButton.remove
+
+    #adds the ships
+    $shipCount.times do |i|
+      $ships.push(Ship.new(3, Pos.new(Window.width/2,Window.height/2),$setup[i],i))
+    end
+
+    $stop = false
+
+  end
 end
+
+startGame()
 
 #this is a ruby2d event that is called every time a key is pushed down. it gets passed the key that was pushed in the event var
 on :key_down do |event|
@@ -69,6 +94,10 @@ def waveContoller()
   if $asteroids.length <= 0
     $wave += 1
 
+    $ships.each do |ship|
+      ship.powerUp('Immune',[0.36, 0.90, 0.71, 1], 2 + (2 * (0.2 * $wave).to_i))
+    end
+
     $waveUI.remove
     $waveUI = Text.new($wave.to_s, x: Window.width-($wave.to_s.length * 80), y: Window.height-80, z:255, size:80, color: '#fc5656')
     $waveUI.add
@@ -76,7 +105,7 @@ def waveContoller()
     Thread.new {
       ($wave*2+5).times do |i|
         $waveUI.color = '#a4fc56'
-        $asteroids.push(Asteroid.new([128,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
+        $asteroids.push(Asteroid.new([96,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
         sleep(0.2)
         $waveUI.color = '#fc5656'
       end
