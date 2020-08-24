@@ -144,7 +144,7 @@ class Ship
   #this gets called if the user presses the shoot key
   def shoot()
     #this adda a new bullet object to the ships bullet array with the same position and velocity of the ship
-    $pew.play
+    SoundManager.play("pew")
     for i in 1..@shotCount
       @bullets.push(Bullet.new(Pos.new(@pos.x + (i-1)*16,@pos.y + (i-1)*16),Pos.new(@vel.x,@vel.y),@bullets,@size/2, self))
     end
@@ -186,7 +186,7 @@ class Ship
       case type
 
       when 'Speed'
-        $speedUp.play
+        SoundManager.play("speedUp")
         self.clearPowerUps()
         @speed *= 2
         @pointAdd *=3
@@ -200,11 +200,11 @@ class Ship
         end
 
       when '1Up'
-        $lifeUp.play
+        SoundManager.play("lifeUp")
         self.addHealth(1)
 
       when 'Triple'
-        $triple.play
+        SoundManager.play("triple")
         self.clearPowerUps()
         @shotCount *=3
         @model.color = tint
@@ -215,7 +215,7 @@ class Ship
         end
 
       when 'Pierce'
-        $lifeUp.play
+        SoundManager.play("triple")
         self.clearPowerUps()
         @pierce = true
         @model.color = tint
@@ -226,7 +226,7 @@ class Ship
         end
 
       when 'Immune'
-        $lifeUp.play
+        SoundManager.play("lifeUp")
         self.clearPowerUps()
         @immune = true
         @model.color = tint
@@ -261,7 +261,7 @@ class Ship
     if @immune == false
       self.minusHealth(1)
       self.clearPowerUps()
-      $crash.play
+      SoundManager.play("crash")
 
       if @health >=1 #if it still has lives left
         @pos = Pos.new(Window.width/2,Window.height/2)
@@ -352,7 +352,7 @@ class Ship
         @powerUpTimer-=1
         if @powerUpTimer <= 0
           #this removes the powerup if there is no time left
-          $downgrade.play
+          SoundManager.play("downgrade")
           self.clearPowerUps()
           @timerLabel.remove
         end
@@ -393,7 +393,7 @@ class Ship
     self.move()
 
     @pointLabel.remove
-    @pointLabel = Text.new('Player ' + (@shipID + 1).to_s + ' Points:' + @points.to_s, x: 0, y: Window.height-(20 * (@shipID+1)), z:255, size:20)
+    @pointLabel = Text.new('Player ' + (@shipID + 1).to_s + ' Points:' + @points.to_s, x: 0, y: (Window.height-(20 * (@shipID+1))) - 20, z:255, size:20)
     @pointLabel.add
   end
 end

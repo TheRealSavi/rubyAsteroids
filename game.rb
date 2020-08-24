@@ -12,15 +12,7 @@ require_relative 'class/Com.rb'
 require_relative 'class/WaveManager.rb'
 require_relative 'class/GameManager.rb'
 require_relative 'class/Ui.rb'
-
-#imports sounds
-$downgrade = Sound.new('sounds/downgrade.mp3')
-$speedUp   = Sound.new('sounds/speedUp.mp3')
-$triple    = Sound.new('sounds/triple.mp3')
-$crash     = Sound.new('sounds/crash.mp3')
-$boom      = Sound.new('sounds/boom.mp3')
-$pew       = Sound.new('sounds/pew.mp3')
-$lifeUp    = Sound.new('sounds/1up.mp3')
+require_relative 'class/SoundManager.rb'
 
 GameManager.start()
 

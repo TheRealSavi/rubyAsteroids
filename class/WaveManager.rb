@@ -1,5 +1,6 @@
 class WaveManager
   @@wave = 0
+  @@waveLabel = Text.new(@@wave.to_s, x: Window.width - 60, y: 0, z: 998,size:50,color: "#da2929")
   @@shipsInWave = 0
   @@timer = 0
   @@shipsAdded = 0
@@ -19,6 +20,7 @@ class WaveManager
 
   def self.nextWave()
     @@wave = @@wave + 1
+    @@waveLabel.text = @@wave.to_s
     @@shipsInWave = @@wave * 2 + 5
     @@makingWave = true
     @@timer = 0

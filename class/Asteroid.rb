@@ -39,7 +39,7 @@ class Asteroid
 
   #this gets called by a bullet when the bullet detects it has hit this asteroid
   def split()
-    $boom.play
+    SoundManager.play("boom")
     #if the asteroid is too small to split then it will kill itself
     if @size <= 32
       self.kill()
