@@ -47,15 +47,15 @@ class Asteroid
       #if it is good to go then the size will be halved, kill itself, ans create two new asteroids
       @size = @size/2
       self.kill()
-      $asteroids.push(Asteroid.new(@size, Pos.new(rand(@pos.x-64..@pos.x+64).clamp(0,Window.width-@size),rand(@pos.y-64..@pos.y+64).clamp(0,Window.height-@size))))
-      $asteroids.push(Asteroid.new(@size, Pos.new(rand(@pos.x-64..@pos.x+64).clamp(0,Window.width-@size),rand(@pos.y-64..@pos.y+64).clamp(0,Window.height-@size))))
+      GameManager.getAsteroids().push(Asteroid.new(@size, Pos.new(rand(@pos.x-64..@pos.x+64).clamp(0,Window.width-@size),rand(@pos.y-64..@pos.y+64).clamp(0,Window.height-@size))))
+      GameManager.getAsteroids().push(Asteroid.new(@size, Pos.new(rand(@pos.x-64..@pos.x+64).clamp(0,Window.width-@size),rand(@pos.y-64..@pos.y+64).clamp(0,Window.height-@size))))
     end
   end
 
   #this gets called by the split function if it is too small to split
   def kill()
     #this removes itself from the asteroids array
-    $asteroids.delete(self)
+    GameManager.getAsteroids().delete(self)
     #this gets rid of the model from the window
     @model.remove
   end

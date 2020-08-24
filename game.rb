@@ -9,6 +9,9 @@ require_relative 'class/Asteroid.rb'
 require_relative 'class/Bullet.rb'
 require_relative 'class/Ship.rb'
 require_relative 'class/Com.rb'
+require_relative 'class/WaveManager.rb'
+require_relative 'class/GameManager.rb'
+require_relative 'class/Ui.rb'
 
 #imports sounds
 $downgrade = Sound.new('sounds/downgrade.mp3')
@@ -19,114 +22,50 @@ $boom      = Sound.new('sounds/boom.mp3')
 $pew       = Sound.new('sounds/pew.mp3')
 $lifeUp    = Sound.new('sounds/1up.mp3')
 
-def startGame()
-  #initializes global variables
-  $asteroids = []
-  $ships = []
-
-  $stop = true
-  $wave = 0
-
-  $waveUI = Text.new("")
-
-  $setup = [
-    ["w","a","s","d","e","r"],
-    ["i","j","k","l","o","p"],
-  ]
-
-  $uiBackground = Square.new(x:0,y:0,size:Window.width,color:'black',z:999)
-  $uiSplash = Text.new("RUBY ASTEROIDS!",x:0, z:1000, size:Window.width/9)
-  $uiShipCountConfirmButton = Button.new(displayName: 'Confirm', x:(Window.width/2), y:(Window.height/2)+30,size:10,z:1000,type:'clicker')
-  $uiStartWaveSlider = Slider.new(displayName: 'Start on Wave', x:(Window.width/2)-150, y:(Window.height/2)-130,size:15,length:300,z:1000, min:1,max:50)
-  $uiShipCountSlider = Slider.new(displayName: 'Ship Count', x:(Window.width/2)-150, y:(Window.height/2)-30,size:15,length:300,z:1000, min:1,max:$setup.count)
-
-  $uiShipCountConfirmButton.onClick do
-    $shipCount = $uiShipCountSlider.value.to_i
-    $wave = $uiStartWaveSlider.value.to_i - 1
-    if $shipCount <= 0
-      $shipCount = 1
-    end
-    $uiSplash.remove
-    $uiBackground.remove
-    $uiShipCountSlider.remove
-    $uiStartWaveSlider.remove
-    $uiShipCountConfirmButton.remove
-
-    #adds the ships
-    $shipCount.times do |i|
-      $ships.push(Ship.new(3, Pos.new(Window.width/2,Window.height/2),$setup[i],i))
-    end
-
-    $stop = false
-
-  end
-end
-
-startGame()
+GameManager.start()
 
 #this is a ruby2d event that is called every time a key is pushed down. it gets passed the key that was pushed in the event var
 on :key_down do |event|
-  $ships.each do |i|      #this goes through all the ships so they are all controlled at once
-    if i.lerps == 0 && i.isDead == false       #if the current ship isnt animating then check for key input
-      case event.key
-      when i.Control["forward"]
-        i.vel = Pos.new(0,-i.speed)
-        i.changeDir(270)
-      when i.Control["left"]
-        i.vel = Pos.new(-i.speed,0)
-        i.changeDir(180)
-      when i.Control["backward"]
-        i.vel = Pos.new(0,i.speed)
-        i.changeDir(90)
-      when i.Control["right"]
-        i.vel = Pos.new(i.speed,0)
-        i.changeDir(0)
-      when i.Control["shoot"]
-        i.shoot()
-      when i.Control["use"]
-        i.use()
+  if GameManager.isRunning == true
+    GameManager.getShips.each do |ship|      #this goes through all the ships so they are all controlled at once
+      if ship.lerps == 0 && ship.isDead == false       #if the current ship isnt animating then check for key input
+        case event.key
+        when ship.Control["forward"]
+          ship.vel = Pos.new(0,-i.speed)
+          ship.changeDir(270)
+        when ship.Control["left"]
+          ship.vel = Pos.new(-i.speed,0)
+          ship.changeDir(180)
+        when i.Control["backward"]
+          ship.vel = Pos.new(0,i.speed)
+          ship.changeDir(90)
+        when i.Control["right"]
+          ship.vel = Pos.new(i.speed,0)
+          ship.changeDir(0)
+        when ship.Control["shoot"]
+          ship.shoot()
+        when i.Control["use"]
+          ship.use()
+        end
       end
     end
-  end
-end
-
-def waveContoller()
-  if $asteroids.length <= 0
-    $wave += 1
-
-    $ships.each do |ship|
-      ship.powerUp('Immune',[0.36, 0.90, 0.71, 1], 2 + (2 * (0.2 * $wave).to_i))
-    end
-
-    $waveUI.remove
-    $waveUI = Text.new($wave.to_s, x: Window.width-($wave.to_s.length * 80), y: Window.height-80, z:255, size:80, color: '#fc5656')
-    $waveUI.add
-
-    Thread.new {
-      ($wave*2+5).times do |i|
-        $waveUI.color = '#a4fc56'
-        $asteroids.push(Asteroid.new([96,64,32].sample, Pos.new(rand(1..Window.width-128),rand(1..Window.height-128))))
-        sleep(0.2)
-        $waveUI.color = '#fc5656'
-      end
-    }
   end
 end
 
 #this is a ruby2d event that is called every frame
 update do
-  if !$stop
+  if GameManager.isRunning
 
-    waveContoller()
+    WaveManager.update()
 
-    for i in $asteroids
-      i.update()           #this calls all the asteroids update functions
+    for asteroid in GameManager.getAsteroids
+      asteroid.update()           #this calls all the asteroids update functions
     end
 
-    for i in $ships
-      i.update()           #this updates all the ships
-      for j in i.bullets
-        j.update()         #this updates all the ships bullets
+    for ship in GameManager.getShips
+      ship.update()           #this updates all the ships
+      for bullet in ship.bullets
+        bullet.update()         #this updates all the ships bullets
       end
     end
 
@@ -134,4 +73,4 @@ update do
 end
 
 #this is the ruby2d method that shows the window
-show
+show()

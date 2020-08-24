@@ -36,7 +36,7 @@ class Bullet
   #this function gets called every frame by the update method
   def hit()
     #first it runs through all the asteroids and checks if itself is inside one
-    for k in $asteroids
+    for k in GameManager.getAsteroids()
       if Intersect.new([@model.x,@model.y,@size],[k.pos.x,k.pos.y,k.size]).calculate()
         #if it detects it is in an asteroid it calls that asteroids split function and then kills itself
         #it sends the ship that shot it its powerup value and tint so the ship can interpret it

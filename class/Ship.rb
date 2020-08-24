@@ -243,13 +243,13 @@ class Ship
   #it gets called every frame by the ships update method
   def collideCheck()
 
-    for k in $asteroids #first it runs through all the asteroids and checks if itself is inside one
+    for k in GameManager.getAsteroids() #first it runs through all the asteroids and checks if itself is inside one
       if Intersect.new([@model.x,@model.y,@size],[k.pos.x,k.pos.y,k.size]).calculate()
         self.hurt() #if it detects it has hit an asteroid the ship gets hurt
       end
     end
 
-    for k in $ships
+    for k in GameManager.getShips()
       if Intersect.new([@model.x,@model.y,@size],[k.pos.x,k.pos.y,k.size]).calculate()
 
       end
@@ -276,7 +276,7 @@ class Ship
   def reviveLabelCheck()
     if @health >= 2
       @reviveLabel.remove
-      $ships.each do |i|
+      GameManager.getShips().each do |i|
         if i != self
           if i.isDead == true
             if (@pos.x-@size*2..@pos.x+@size*2).include?(i.pos.x) && (@pos.y-@size*2..@pos.y+@size*2).include?(i.pos.y)
@@ -292,7 +292,7 @@ class Ship
 
   def use()
     if @health >= 2
-      $ships.each do |i|
+      GameManager.getShips().each do |i|
         if i != self
           if i.isDead == true
             if (@pos.x-@size*2..@pos.x+@size*2).include?(i.pos.x) && (@pos.y-@size*2..@pos.y+@size*2).include?(i.pos.y)
@@ -325,12 +325,12 @@ class Ship
     else
       gameOver = Text.new('GAME OVER', x: Window.width/2-100, y: Window.height/2, z: 255, size: 32)
       gameOver.add
-      $stop = true
+      GameManager.endGame
     end
   end
 
   def otherShipAlive()
-    $ships.each do |i|
+    GameManager.getShips().each do |i|
       if i.isDead == false
         return true
       end
