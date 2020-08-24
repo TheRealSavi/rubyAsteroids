@@ -9,6 +9,10 @@ class WaveManager
     return @@wave
   end
 
+  def self.setWave(startWave)
+    @@wave = startWave
+  end
+
   def self.isMakingWave
     return @@makingWave
   end

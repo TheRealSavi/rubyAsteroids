@@ -15,6 +15,7 @@ class GameManager
 
   def self.startGame
     if @@running == false
+      WaveManager.setWave(@@startScreenUI.getStartWave())
       @@startScreenUI.getShipCount().times do |i|
         @@ships.push(Ship.new(3, Pos.new(Window.width/2,Window.height/2),@@controls[i],i))
       end

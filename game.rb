@@ -31,20 +31,20 @@ on :key_down do |event|
       if ship.lerps == 0 && ship.isDead == false       #if the current ship isnt animating then check for key input
         case event.key
         when ship.Control["forward"]
-          ship.vel = Pos.new(0,-i.speed)
+          ship.vel = Pos.new(0,-ship.speed)
           ship.changeDir(270)
         when ship.Control["left"]
-          ship.vel = Pos.new(-i.speed,0)
+          ship.vel = Pos.new(-ship.speed,0)
           ship.changeDir(180)
-        when i.Control["backward"]
-          ship.vel = Pos.new(0,i.speed)
+        when ship.Control["backward"]
+          ship.vel = Pos.new(0,ship.speed)
           ship.changeDir(90)
-        when i.Control["right"]
-          ship.vel = Pos.new(i.speed,0)
+        when ship.Control["right"]
+          ship.vel = Pos.new(ship.speed,0)
           ship.changeDir(0)
         when ship.Control["shoot"]
           ship.shoot()
-        when i.Control["use"]
+        when ship.Control["use"]
           ship.use()
         end
       end
